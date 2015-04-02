@@ -7,14 +7,12 @@
 //Michael Hirsch Oct 2013 -- updated vbeam,tetabeam to use C++11 vector format
 
 #ifdef _WIN32
-
-#include <conio.h>
-
+ #include <conio.h>
 #else // LINUX MAC
-#include <ncurses.h>
-#endif 
+ #include <ncurses.h>
+#endif
 
-#include <iostream>
+#include <boost/format.hpp>
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +32,6 @@ char filesep[2]="/";
 char outDir[16]="test16"; //directory to put all results
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////    Physical constants
 
 const double pi=3.141592653589793;
 const double me=9.109e-31;
@@ -45,7 +42,6 @@ const double eV=1.6e-19;
 const double epsilon0=8.854e-12;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////    Plasma parameters
 
 int Z=1;
 double Te=3000.0;
@@ -72,14 +68,14 @@ double L=70.0;           // simulation box length (meter)j
 const int N=2004;          // number of samples in L; should be devidable by 6
 double Xstep=L/N;
 const int QW=1;     //number of realizations
-unsigned int SEED=600; 
+unsigned int SEED=600;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 double eta=(Te+3*Ti)/Te;
 double ve=sqrt(Kb*Te/me);
 double Cs=sqrt(eta*me/mi)*ve;
-double omegae=sqrt(n0*pow(electroncharge,2)/me/epsilon0);	
+double omegae=sqrt(n0*pow(electroncharge,2)/me/epsilon0);
 double lambdaD=ve/omegae;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,8 +88,7 @@ void Xsection(double&,double&,double k);
 
 int main(int argc, char * argv[])
 {
-    printf("Nnbeam=%i \n",Nnbeam);
-	printf("Nvbeam=%i \n",Nvbeam);
+    printf("Nnbeam / Nvbeam=% i / %i\n",Nnbeam,Nvbeam);
 	printf("TT=%0.1f time steps \n",TT);
 
 	time_t now;
@@ -105,10 +100,10 @@ int main(int argc, char * argv[])
 /////////////////////////////////////////////////////////////////////////////////////////////////   initialization
 
 
-vector<double> vbeam (Nvbeam);
+vector<double> vbeam (Nvbeam);  // C++ vector is resizable at run-time, like Fortran, Matlab....
 vector<double> tetabeam (Nvbeam);
 
-for (int i=0;i<Nvbeam;i++){
+for (int i=0; i<Nvbeam; i++){
  vbeam[i]=sqrt(eV*vbeam_ev.at(i)*2/me);
  tetabeam[i]=0.3*vbeam.at(i);
 			printf("vbeam[%i]=%0.6f \n",i,vbeam.at(i));
@@ -119,7 +114,7 @@ for (int i=0;i<Nvbeam;i++){
 for (int beami=0;beami<Nnbeam;beami++){
 for (int beamj=0;beamj<Nvbeam;beamj++){
 
-	
+
 	int p[N];
 	double k[N];
 	double Xsection_ion=0.0;
@@ -170,15 +165,15 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	parameters[29]=Cs;
 	parameters[30]=omegae;
 	parameters[31]=lambdaD;
-	
+
 	char fnParam[64];
 	sprintf(fnParam,"%s%sparameters_n%d_v%d.bin",outDir,filesep, beami, beamj);
 	FILE* parameters_out;
 	parameters_out = fopen(fnParam, "wb");
-	int bout=fwrite(parameters, 1, sizeof(parameters), parameters_out); 
+	int bout=fwrite(parameters, 1, sizeof(parameters), parameters_out);
 	fclose(parameters_out);
 	printf("Wrote %i bytes to %s\n",bout,fnParam);
-	
+
 	for (int ii=0;ii<N;ii++){
 		p[ii]=ii-N/2;
 		if (ii==N/2){
@@ -209,14 +204,14 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 		else{
 			gamal1=(-1)*sqrt(pi/8)*pow(omegae/k[ii]/ve,2)*sign(k[ii])*pow(omegaL[ii],2)/(k[ii]*ve)*exp((-1)*pow(omegaL[ii]/k[ii]/ve,2)/2);    //Landau damping due to the thermal electrons
 			gamal2=(-1)*sqrt(pi/8)*pow(omegae/k[ii]/tetabeam.at(beamj),2)*sign(k[ii])*nbeam.at(beami)/n0*omegaL[ii]*(omegaL[ii]-k[ii]*vbeam.at(beamj))/(k[ii]*tetabeam.at(beamj))*exp((-1)*pow((omegaL[ii]-k[ii]*vbeam.at(beamj))/k[ii]/tetabeam.at(beamj),2)/2);  //Landau damping due to the beam
-			gamal=gamal1+gamal2;    // here decide to include the beam 
+			gamal=gamal1+gamal2;    // here decide to include the beam
 			nue[ii]=nuec/2-gamal1;
 			Source_factor_n[ii]=2*nui[ii]*sqrt(4*nui[ii]*k[ii]*k[ii]/(4*nui[ii]*nui[ii]+k[ii]*k[ii])*n_thermal_k_squared*power_n_cte);
 			Source_factor_E[ii]=sqrt(2*nue[ii]*E_thermal_k_squared*power_E_cte);                                                         // source factor is the factor by which we balance the thermal source intensity
 			nue[ii]=nuec/2-gamal;
 		}
-				
-		
+
+
 		output1[ii][0]=p[ii];
 		output1[ii][1]=k[ii];
 		output1[ii][2]=Xsection_ion;
@@ -239,7 +234,7 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	fclose(output1_out);
 	printf("Wrote %i bytes to %s\n",bout,fnOutput1);
 
-	
+
 	static double EE [3][N][2];
 	static double nn [3][N][2];
 	static double vv [3][N][2];
@@ -253,10 +248,10 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	double kn1[2], kn2[2], kn3[2], kn4[2], kv1[2], kv2[2], kv3[2], kv4[2];
 	static double total_EE[20000*N*2];
 	static double total_nn[20000*N*2];
-	
 
 
-	
+
+
 for (int realization=0;realization<QW;realization++){
 
 	unsigned long int aabb=SEED+realization;
@@ -265,18 +260,18 @@ for (int realization=0;realization<QW;realization++){
 	std::normal_distribution<long double> distribution (0.0,1.0);
 
 	char nameE[64],namen[64];
-	sprintf(nameE, "%s%sEE%d_n%d_v%d.bin",outDir,filesep, SEED+realization, beami, beamj); 
+	sprintf(nameE, "%s%sEE%d_n%d_v%d.bin",outDir,filesep, SEED+realization, beami, beamj);
 	FILE* EE_out;
 	EE_out = fopen(nameE, "wb");
 	sprintf(namen, "%s%snn%d_n%d_v%d.bin",outDir,filesep, SEED+realization, beami, beamj);
 	FILE* nn_out;
 	nn_out = fopen(namen, "wb");
-	
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////   main loops
 
 	for (int iij1=0;iij1<3;iij1++){
 		for (int iij2=0;iij2<N;iij2++){
-			
+
 				EE [iij1][iij2][0]=sqrt(output1[iij2][4]/2.0);
 				EE [iij1][iij2][1]=sqrt(output1[iij2][4]/2.0);
 				nn [iij1][iij2][0]=sqrt(output1[iij2][5]);
@@ -284,18 +279,18 @@ for (int realization=0;realization<QW;realization++){
 				vv [iij1][iij2][0]=0;
 				vv [iij1][iij2][1]=0;
 
-			
+
 		}
 	}
 
-	int counter1=0;		
+	int counter1=0;
 	for (int tt1=1;tt1<=TT;tt1++){
-			
 
-		int c0=(tt1-1) % 3;
+
+		//int c0=(tt1-1) % 3; //not used
 		int c1=(tt1) % 3;
 		int c2=(tt1+1) % 3;
-		long double omega_off=omegae+2*pi*300000;
+		//long double omega_off=omegae+2*pi*300000; not used right now
 
 					//update display every 50th iteration
 		if (tt1 % 50 == 0){
@@ -304,18 +299,18 @@ for (int realization=0;realization<QW;realization++){
 
 			for (pp=0;pp<N;pp++){
 
-								
+
 				LL= max1(p[pp]-N/3,-N/3);
 				UU= min1(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
-				
+
 				for (int q=LL;q<=UU;q++){
 					CC[0]=CC[0]+EE[c1][(q+N/2)][0]*nn[c1][(p[pp]-q+N/2)][0]-EE[c1][(q+N/2)][1]*nn[c1][(p[pp]-q+N/2)][1];
 					CC[1]=CC[1]+EE[c1][(q+N/2)][0]*nn[c1][(p[pp]-q+N/2)][1]+EE[c1][(q+N/2)][1]*nn[c1][(p[pp]-q+N/2)][0];
 				}
-				
-								
+
+
 				SSE[pp][0]=distribution(generator)*Source_factor_E[pp]/sqrt(Tstep);
 				SSE[pp][1]=distribution(generator)*Source_factor_E[pp]/sqrt(Tstep);
 
@@ -327,40 +322,40 @@ for (int realization=0;realization<QW;realization++){
 
 			for (pp=0;pp<N;pp++){
 
-								
+
 				LL= max1(p[pp]-N/3,-N/3);
 				UU= min1(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
-				
+
 				for (int q=LL;q<=UU;q++){
 					CC[0]=CC[0]+(EE[c1][(q+N/2)][0]+k1[(q+N/2)][0]/2)*nn[c1][(p[pp]-q+N/2)][0]-(EE[c1][(q+N/2)][1]+k1[(q+N/2)][1]/2)*nn[c1][(p[pp]-q+N/2)][1];
 					CC[1]=CC[1]+(EE[c1][(q+N/2)][0]+k1[(q+N/2)][0]/2)*nn[c1][(p[pp]-q+N/2)][1]+(EE[c1][(q+N/2)][1]+k1[(q+N/2)][1]/2)*nn[c1][(p[pp]-q+N/2)][0];
 				}
-				
-				
-				
+
+
+
 				cte1=1.5*omegae*(lambdaD*k[pp])*(lambdaD*k[pp]);
 				//cte1=1.5*Kb*Te/me/omega_off*k[pp]*k[pp]-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
 				k2[pp][0]=Tstep*(cte1*(EE[c1][pp][1]+k1[pp][1]/2.0-SSE[pp][0]/2.0*Tstep)-nue[pp]*(EE[c1][pp][0]+k1[pp][0]/2.0+SSE[pp][1]/2.0*Tstep)+cte2*CC[1]);
                 k2[pp][1]=Tstep*((-1)*cte1*(EE[c1][pp][0]+k1[pp][0]/2.0+SSE[pp][1]/2.0*Tstep)-nue[pp]*(EE[c1][pp][1]+k1[pp][1]/2.0-SSE[pp][0]/2.0*Tstep)-cte2*CC[0]);
 			}
 
-            
+
 			for (pp=0;pp<N;pp++){
 
-								
+
 				LL= max1(p[pp]-N/3,-N/3);
 				UU= min1(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
-				
+
 				for (int q=LL;q<=UU;q++){
 					CC[0]=CC[0]+(EE[c1][(q+N/2)][0]+k2[(q+N/2)][0]/2)*nn[c1][(p[pp]-q+N/2)][0]-(EE[c1][(q+N/2)][1]+k2[(q+N/2)][1]/2)*nn[c1][(p[pp]-q+N/2)][1];
 					CC[1]=CC[1]+(EE[c1][(q+N/2)][0]+k2[(q+N/2)][0]/2)*nn[c1][(p[pp]-q+N/2)][1]+(EE[c1][(q+N/2)][1]+k2[(q+N/2)][1]/2)*nn[c1][(p[pp]-q+N/2)][0];
 				}
-				
-				
+
+
 
 				cte1=1.5*omegae*(lambdaD*k[pp])*(lambdaD*k[pp]);
 				//cte1=1.5*Kb*Te/me/omega_off*k[pp]*k[pp]-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
@@ -370,35 +365,35 @@ for (int realization=0;realization<QW;realization++){
 
 			for (pp=0;pp<N;pp++){
 
-								
+
 				LL= max1(p[pp]-N/3,-N/3);
 				UU= min1(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
-				
+
 				for (int q=LL;q<=UU;q++){
 					CC[0]=CC[0]+(EE[c1][(q+N/2)][0]+k3[(q+N/2)][0])*nn[c1][(p[pp]-q+N/2)][0]-(EE[c1][(q+N/2)][1]+k3[(q+N/2)][1])*nn[c1][(p[pp]-q+N/2)][1];
 					CC[1]=CC[1]+(EE[c1][(q+N/2)][0]+k3[(q+N/2)][0])*nn[c1][(p[pp]-q+N/2)][1]+(EE[c1][(q+N/2)][1]+k3[(q+N/2)][1])*nn[c1][(p[pp]-q+N/2)][0];
 				}
-				
+
 
 				cte1=1.5*omegae*(lambdaD*k[pp])*(lambdaD*k[pp]);
 				//cte1=1.5*Kb*Te/me/omega_off*k[pp]*k[pp]-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
 				k4[pp][0]=Tstep*(cte1*(EE[c1][pp][1]+k3[pp][1]-SSE[pp][0]*Tstep)-nue[pp]*(EE[c1][pp][0]+k3[pp][0]+SSE[pp][1]*Tstep)+cte2*CC[1]);
                 k4[pp][1]=Tstep*((-1)*cte1*(EE[c1][pp][0]+k3[pp][0]+SSE[pp][1]*Tstep)-nue[pp]*(EE[c1][pp][1]+k3[pp][1]-SSE[pp][0]*Tstep)-cte2*CC[0]);
-				
+
                 EE[c2][pp][0]=EE[c1][pp][0]+(k1[pp][0]+2.0*k2[pp][0]+2.0*k3[pp][0]+k4[pp][0])/6.0+SSE[pp][1]*Tstep;
                 EE[c2][pp][1]=EE[c1][pp][1]+(k1[pp][1]+2.0*k2[pp][1]+2.0*k3[pp][1]+k4[pp][1])/6.0-SSE[pp][0]*Tstep;
 				EE[c2][N/2][0]=0.0;
 				EE[c2][N/2][1]=0.0;
-				
+
 
 			}
-                
-            for (pp=0;pp<=N/2;pp++){    	
-				
 
-								         
+            for (pp=0;pp<=N/2;pp++){
+
+
+
 				SSn[0]=distribution(generator)*Source_factor_n[pp]/sqrt(Tstep);
 				SSn[1]=distribution(generator)*Source_factor_n[pp]/sqrt(Tstep);
 
@@ -411,51 +406,51 @@ for (int realization=0;realization<QW;realization++){
 					CC[0]=CC[0]+EE[c1][(q+N/2)][0]*EE[c1][(q-p[pp]+N/2)][0]+EE[c1][(q+N/2)][1]*EE[c1][(q-p[pp]+N/2)][1];
 					CC[1]=CC[1]+EE[c1][(q+N/2)][1]*EE[c1][(q-p[pp]+N/2)][0]-EE[c1][(q+N/2)][0]*EE[c1][(q-p[pp]+N/2)][1];
 				}
-				
-	    
-				
+
+
+
 				kn1[0]=Tstep*(vv[c1][pp][0]);
 				kn1[1]=Tstep*(vv[c1][pp][1]);
 				kv1[0]=Tstep*((-2.0)*nui[pp]*vv[c1][pp][0]-pow(Cs*k[pp],2)*nn[c1][pp][0]-k[pp]*k[pp]*epsilon0/4/mi*CC[0]);
 				kv1[1]=Tstep*((-2.0)*nui[pp]*vv[c1][pp][1]-pow(Cs*k[pp],2)*nn[c1][pp][1]-k[pp]*k[pp]*epsilon0/4/mi*CC[1]);
-				
+
 				CC[0]=0.0;
 				CC[1]=0.0;
 				for (int q=LL;q<=UU;q++){
 					CC[0]=CC[0]+(EE[c1][(q+N/2)][0]+k1[(q+N/2)][0]/2)*(EE[c1][(q-p[pp]+N/2)][0]+k1[(q-p[pp]+N/2)][0]/2)+(EE[c1][(q+N/2)][1]+k1[(q+N/2)][1]/2)*(EE[c1][(q-p[pp]+N/2)][1]+k1[(q-p[pp]+N/2)][1]/2);
 					CC[1]=CC[1]+(EE[c1][(q+N/2)][1]+k1[(q+N/2)][1]/2)*(EE[c1][(q-p[pp]+N/2)][0]+k1[(q-p[pp]+N/2)][0]/2)-(EE[c1][(q+N/2)][0]+k1[(q+N/2)][0]/2)*(EE[c1][(q-p[pp]+N/2)][1]+k1[(q-p[pp]+N/2)][1]/2);
 				}
-				
+
 				kn2[0]=Tstep*(vv[c1][pp][0]+kv1[0]/2+SSn[0]/2*Tstep);
 				kn2[1]=Tstep*(vv[c1][pp][1]+kv1[1]/2+SSn[1]/2*Tstep);
 				kv2[0]=Tstep*((-2.0)*nui[pp]*(vv[c1][pp][0]+kv1[0]/2+SSn[0]/2*Tstep)-pow(Cs*k[pp],2)*(nn[c1][pp][0]+kn1[0]/2)-k[pp]*k[pp]*epsilon0/4/mi*CC[0]);
 				kv2[1]=Tstep*((-2.0)*nui[pp]*(vv[c1][pp][1]+kv1[1]/2+SSn[1]/2*Tstep)-pow(Cs*k[pp],2)*(nn[c1][pp][1]+kn1[1]/2)-k[pp]*k[pp]*epsilon0/4/mi*CC[1]);
-				
+
 				CC[0]=0.0;
 				CC[1]=0.0;
 				for (int q=LL;q<=UU;q++){
 					CC[0]=CC[0]+(EE[c1][(q+N/2)][0]+k2[(q+N/2)][0]/2)*(EE[c1][(q-p[pp]+N/2)][0]+k2[(q-p[pp]+N/2)][0]/2)+(EE[c1][(q+N/2)][1]+k2[(q+N/2)][1]/2)*(EE[c1][(q-p[pp]+N/2)][1]+k2[(q-p[pp]+N/2)][1]/2);
 					CC[1]=CC[1]+(EE[c1][(q+N/2)][1]+k2[(q+N/2)][1]/2)*(EE[c1][(q-p[pp]+N/2)][0]+k2[(q-p[pp]+N/2)][0]/2)-(EE[c1][(q+N/2)][0]+k2[(q+N/2)][0]/2)*(EE[c1][(q-p[pp]+N/2)][1]+k2[(q-p[pp]+N/2)][1]/2);
 				}
-				
+
 				kn3[0]=Tstep*(vv[c1][pp][0]+kv2[0]/2+SSn[0]/2*Tstep);
 				kn3[1]=Tstep*(vv[c1][pp][1]+kv2[1]/2+SSn[1]/2*Tstep);
 				kv3[0]=Tstep*((-2.0)*nui[pp]*(vv[c1][pp][0]+kv2[0]/2+SSn[0]/2*Tstep)-pow(Cs*k[pp],2)*(nn[c1][pp][0]+kn2[0]/2)-k[pp]*k[pp]*epsilon0/4/mi*CC[0]);
 				kv3[1]=Tstep*((-2.0)*nui[pp]*(vv[c1][pp][1]+kv2[1]/2+SSn[1]/2*Tstep)-pow(Cs*k[pp],2)*(nn[c1][pp][1]+kn2[1]/2)-k[pp]*k[pp]*epsilon0/4/mi*CC[1]);
 
-				
+
 				CC[0]=0.0;
 				CC[1]=0.0;
 				for (int q=LL;q<=UU;q++){
 					CC[0]=CC[0]+(EE[c1][(q+N/2)][0]+k3[(q+N/2)][0]/2)*(EE[c1][(q-p[pp]+N/2)][0]+k3[(q-p[pp]+N/2)][0]/2)+(EE[c1][(q+N/2)][1]+k3[(q+N/2)][1]/2)*(EE[c1][(q-p[pp]+N/2)][1]+k3[(q-p[pp]+N/2)][1]/2);
 					CC[1]=CC[1]+(EE[c1][(q+N/2)][1]+k3[(q+N/2)][1]/2)*(EE[c1][(q-p[pp]+N/2)][0]+k3[(q-p[pp]+N/2)][0]/2)-(EE[c1][(q+N/2)][0]+k3[(q+N/2)][0]/2)*(EE[c1][(q-p[pp]+N/2)][1]+k3[(q-p[pp]+N/2)][1]/2);
 				}
-				
+
 				kn4[0]=Tstep*(vv[c1][pp][0]+kv3[0]+SSn[0]*Tstep);
 				kn4[1]=Tstep*(vv[c1][pp][1]+kv3[1]+SSn[1]*Tstep);
 				kv4[0]=Tstep*((-2.0)*nui[pp]*(vv[c1][pp][0]+kv3[0]+SSn[0]*Tstep)-pow(Cs*k[pp],2)*(nn[c1][pp][0]+kn3[0])-k[pp]*k[pp]*epsilon0/4/mi*CC[0]);
 				kv4[1]=Tstep*((-2.0)*nui[pp]*(vv[c1][pp][1]+kv3[1]+SSn[1]*Tstep)-pow(Cs*k[pp],2)*(nn[c1][pp][1]+kn3[1])-k[pp]*k[pp]*epsilon0/4/mi*CC[1]);
-				
+
 
 				vv[c2][pp][0]=vv[c1][pp][0]+(kv1[0]+2*kv2[0]+2*kv3[0]+kv4[0])/6+SSn[0]*Tstep;
 				vv[c2][pp][1]=vv[c1][pp][1]+(kv1[1]+2*kv2[1]+2*kv3[1]+kv4[1])/6+SSn[1]*Tstep;
@@ -500,14 +495,14 @@ for (int realization=0;realization<QW;realization++){
 }//relizations
 }//Nvbeam
 }//Nnbeam
-	
+
 
 	now = time(0);
 	current = localtime(&now);
 	int EndTime[3]={current->tm_hour, current->tm_min, current->tm_sec};
 	printf("Elapsed Time: %i:%i:%i\n", EndTime[0]-StartTime[0], EndTime[1]-StartTime[1], EndTime[2]-StartTime[2]);
 
-	
+
 
 	getch();
 	return 0;

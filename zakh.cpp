@@ -17,13 +17,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const double pi=3.141592653589793;
-const double me=9.109e-31;
-const double electroncharge=1.602e-19;
+const double pi=M_PI;
+const double me=9.10938356e-31; // kg
+const double electroncharge=1.60217662e-19; // coulombs
 const double mi=16*1.66e-27; // atomic oxygen
-const double Kb=1.38e-23;    // Boltzmann cte
-const double eV=1.6e-19;
-const double epsilon0=8.854e-12;
+const double Kb=1.38064852e-23;    // Boltzmann cte
+const double eV=1.602176565e-19;
+const double epsilon0=8.854187817e-12;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -33,8 +33,6 @@ double Ti=1000.0;
 double nuic=1.0;   // ion collision freq
 double nuec=100.0; // electron collision freq
 double n0=5.0e11;  // background density
-std::vector<double> nbeam {(60.0e-7)*n0};
-int Nnbeam=nbeam.size();
 std::vector<double> vbeam_ev {500.0};
 int Nvbeam=vbeam_ev.size();
 double power_n_cte=7.7735e6/sqrt(53.5);
@@ -87,8 +85,9 @@ int main(int argc, char ** argv)
     namespace po = boost::program_options; 
     po::options_description desc("Options"); 
     desc.add_options() 
-      ("help", "Print help messages")
-      ("outdir,o",po::value<std::string>(&odir)->required(), "Output directory");
+      ("help,h", "Print help messages")
+      ("outdir,o",po::value<std::string>(&odir)->required(), "Output directory")
+      ("ev",po::value<std::vector<double> >()->multitoken()->required(),"list of beam energies [eV]"); //semicolon after last option
  
     po::variables_map vm; 
     try 
@@ -107,17 +106,31 @@ int main(int argc, char ** argv)
  
       po::notify(vm); // throws on error, so do after help in case 
                       // there are any problems 
+
+
     } 
     catch(po::error& e) 
     { 
-      std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
+      std::cerr << "ERROR: " << e.what() << std::endl; 
       std::cerr << desc << std::endl; 
       return EXIT_FAILURE; 
     } 
 
-std::string outDir = odir + boost::filesystem::path::preferred_separator;
 
-// create output directory if it doesn't exist (previously, program segfaulted...)
+// store variables
+    std::vector<double> beamev = vm["ev"].as<std::vector<double> >();
+    int Nnbeam=beamev.size(); 
+
+    std::vector<double> nbeam(Nnbeam);
+
+    for (int i=0; i<Nnbeam; i++)
+        nbeam[i] = beamev[i]*n0;
+    
+
+//-------------------------------------------------------------------------------------
+// create output directory if it doesn't exist
+    std::string outDir = odir + boost::filesystem::path::preferred_separator;
+
     boost::filesystem::path odir(outDir);
 
     if(!(boost::filesystem::exists(odir))){

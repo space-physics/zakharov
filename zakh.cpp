@@ -237,7 +237,7 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 		E_thermal_k_squared=Xsection_pl *n0*pow(electroncharge/epsilon0/k[ii],2);
 		}
 		omegaL[ii]=sqrt(pow(omegae,2)+3*pow(k[ii]*ve,2));
-		gamas= (-1)*sqrt(pi/8)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)-1.5))*abs(k[ii])*Cs;
+		gamas= (-1)*sqrt(pi/8)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)-1.5))*std::fabs(k[ii])*Cs;
 		//gamas= (-1)*sqrt(pi/2)*(sqrt(me/mi)+4*pow(Te/2/Ti,2)/sqrt(Te/2/Ti)*exp((-1)*(Te*4/Ti)))*abs(k[ii])*Cs*10;   //based on Robinson 2002
 		//gamas= (-1)*sqrt(pi/8)*pow(1/(1+k[ii]*k[ii]*lambdaD*lambdaD)+3*Ti/Te,2)/sqrt(1/(1+k[ii]*k[ii]*lambdaD*lambdaD)+3*Ti/Te)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)/(1+k[ii]*k[ii]*lambdaD*lambdaD)-1.5))*abs(k[ii])*Cs;   //Based on some Chinese paper!!
 		nui[ii]=(nuic/2-gamas);

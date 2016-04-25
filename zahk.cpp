@@ -2,32 +2,18 @@
 // Last update: 9/5/2013
 // For Kappa on: 01/05/2016
 
-//Michael Hirsch Oct 2013 -- updated vbeam,tetabeam to use C++11 vector format
+//Michael Hirsch Oct 2013 -- updated vbeam,tetabeam to use C++ vector format
 
-#ifdef _WIN32
-#include <conio.h>
-#else
-#include <ncurses.h>
-#endif
-
+#include <boost/filesystem.hpp>
+#include "boost/program_options.hpp" 
 #include <iostream>
 #include <vector>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <random>
-#include <time.h>
+#include <ctime>
 #include <fstream>
-#include <math.h>
-using namespace std;
-
-
-#ifdef _WIN32
-char filesep[2]="\\";
-#else
-char filesep[2]="/";
-#endif
-
-char outDir[16]="test16"; //directory to put all results
+#include <cmath>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,9 +33,9 @@ double Ti=1000.0;
 double nuic=1.0;   // ion collision freq
 double nuec=100.0; // electron collision freq
 double n0=5.0e11;  // background density
-vector<double> nbeam {(60.0e-7)*n0};
+std::vector<double> nbeam {(60.0e-7)*n0};
 int Nnbeam=nbeam.size();
-vector<double> vbeam_ev {500.0};
+std::vector<double> vbeam_ev {500.0};
 int Nvbeam=vbeam_ev.size();
 double power_n_cte=7.7735e6/sqrt(53.5);
 double power_E_cte=0.5033*0.5033/sqrt(3.0);
@@ -85,6 +71,8 @@ double Cs=sqrt(eta*me/mi)*ve;
 double omegae=sqrt(n0*pow(electroncharge,2)/me/epsilon0);
 double lambdaD=ve/omegae;
 
+std::string odir;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////   main
 
@@ -93,8 +81,55 @@ int min1 (int, int);
 int sign(double);
 void Xsection(double&,double&,double k);
 
-int main(int argc, char * argv[])
+int main(int argc, char ** argv)
 {
+
+
+// argparse
+    namespace po = boost::program_options; 
+    po::options_description desc("Options"); 
+    desc.add_options() 
+      ("help", "Print help messages")
+      ("outdir,o",po::value<std::string>(&odir)->required(), "Output directory");
+ 
+    po::variables_map vm; 
+    try 
+    { 
+      po::store(po::parse_command_line(argc, argv, desc),  
+                vm); // can throw 
+ 
+      /** --help option 
+       */ 
+      if ( vm.count("help")  ) 
+      { 
+        std::cout << "Basic Command Line Parameter App" << std::endl 
+                  << desc << std::endl; 
+        return EXIT_SUCCESS; 
+      } 
+ 
+      po::notify(vm); // throws on error, so do after help in case 
+                      // there are any problems 
+    } 
+    catch(po::error& e) 
+    { 
+      std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
+      std::cerr << desc << std::endl; 
+      return EXIT_FAILURE; 
+    } 
+
+std::string outDir = odir + boost::filesystem::path::preferred_separator;
+
+// create output directory if it doesn't exist (previously, program segfaulted...)
+    boost::filesystem::path odir(outDir);
+
+    if(!(boost::filesystem::exists(odir))){
+        if (boost::filesystem::create_directory(odir))
+            std::cout << "created output directory " << outDir << std::endl;
+    }
+    else{
+        std::cout << "using output directory " << outDir << std::endl;
+    }
+//-------------------------------------------------------------------------------------
     printf("Nnbeam=%i \n",Nnbeam);
 	printf("Nvbeam=%i \n",Nvbeam);
 	printf("TT=%0.1f time steps \n",TT);
@@ -108,8 +143,8 @@ int main(int argc, char * argv[])
 /////////////////////////////////////////////////////////////////////////////////////////////////   initialization
 
 
-vector<double> vbeam (Nvbeam);
-vector<double> tetabeam (Nvbeam);
+std::vector<double> vbeam (Nvbeam);
+std::vector<double> tetabeam (Nvbeam);
 
 for (int i=0; i<Nvbeam; i++){
  vbeam[i]=sqrt(eV*vbeam_ev.at(i)*2/me);
@@ -176,13 +211,13 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	parameters[31]=lambdaD;
 	//have to include other parameters regarding the Kappa distribution
 	
-	char fnParam[64];
-	sprintf(fnParam,"%s%sparameters_n%d_v%d.bin",outDir,filesep, beami, beamj);
+	std::string fn = outDir + "parameters_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
+	const char* fnp = fn.c_str();
 	FILE* parameters_out;
-	parameters_out = fopen(fnParam, "wb");
+	parameters_out = fopen(fnp, "wb");
 	int bout=fwrite(parameters, 1, sizeof(parameters), parameters_out);
 	fclose(parameters_out);
-	printf("Wrote %i bytes to %s\n",bout,fnParam);
+	std::cout << "Wrote " << bout << " bytes to " << fn << std::endl;
 
 	for (int ii=0;ii<N;ii++){
 		p[ii]=ii-N/2;
@@ -239,13 +274,13 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 		output1[ii][11]=Source_factor_n[ii];
 	}
 
-	char fnOutput1[64];
-	sprintf(fnOutput1,"%s%soutput1_n%d_v%d.bin",outDir,filesep, beami, beamj);
+	fn = outDir + "output1_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
+	const char* fno = fn.c_str();
 	FILE* output1_out;
-	output1_out = fopen(fnOutput1, "wb");
+	output1_out = fopen(fno, "wb");
 	bout = fwrite(output1, 1, sizeof(output1), output1_out);
 	fclose(output1_out);
-	printf("Wrote %i bytes to %s\n",bout,fnOutput1);
+	std::cout << "Wrote " << bout << " bytes to " << fn << std::endl;
 
 
 	static double EE [3][N][2];
@@ -270,11 +305,13 @@ for (int realization=0;realization<QW;realization++){
 	std::default_random_engine generator (aabb);
 	std::normal_distribution<long double> distribution (0.0,1.0);
 
-	char nameE[64],namen[64];
-	sprintf(nameE, "%s%sEE%d_n%d_v%d.bin",outDir,filesep, SEED+realization, beami, beamj);
+	fn = outDir + "EE" + std::to_string(SEED+realization) + "_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
+    const char* nameE = fn.c_str();
 	FILE* EE_out;
 	EE_out = fopen(nameE, "wb");
-	sprintf(namen, "%s%snn%d_n%d_v%d.bin",outDir,filesep, SEED+realization, beami, beamj);
+	
+	fn = outDir + "nn" + std::to_string(SEED+realization) + "_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
+    const char* namen = fn.c_str();
 	FILE* nn_out;
 	nn_out = fopen(namen, "wb");
 
@@ -304,10 +341,10 @@ for (int realization=0;realization<QW;realization++){
 	int counter1=0;
 	for (int tt1=1;tt1<=TT;tt1++){
 
-		int c0=(tt1-1) % 3;
+//		int c0=(tt1-1) % 3;
 		int c1=(tt1) % 3;
 		int c2=(tt1+1) % 3;
-		long double omega_off=omegae+2*pi*300000;
+//		long double omega_off=omegae+2*pi*300000;
 
 					//update display every 50th iteration
 		if (tt1 % 50 == 0){
@@ -519,9 +556,7 @@ for (int realization=0;realization<QW;realization++){
 	printf("Elapsed Time: %i:%i:%i\n", EndTime[0]-StartTime[0], EndTime[1]-StartTime[1], EndTime[2]-StartTime[2]);
 
 
-
-	getch();
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 

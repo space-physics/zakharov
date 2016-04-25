@@ -76,8 +76,6 @@ std::string odir;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////   main
 
-int max1 (int, int);
-int min1 (int, int);
 int sign(double);
 void Xsection(double&,double&,double k);
 
@@ -354,8 +352,8 @@ for (int realization=0;realization<QW;realization++){
 			for (pp=0;pp<N;pp++){
 
 
-				LL= max1(p[pp]-N/3,-N/3);
-				UU= min1(N/3,p[pp]+N/3);
+				LL= std::max(p[pp]-N/3,-N/3);
+				UU= std::min(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
 
@@ -377,8 +375,8 @@ for (int realization=0;realization<QW;realization++){
 			for (pp=0;pp<N;pp++){
 
 
-				LL= max1(p[pp]-N/3,-N/3);
-				UU= min1(N/3,p[pp]+N/3);
+				LL= std::max(p[pp]-N/3,-N/3);
+				UU= std::min(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
 
@@ -399,8 +397,8 @@ for (int realization=0;realization<QW;realization++){
 			for (pp=0;pp<N;pp++){
 
 
-				LL= max1(p[pp]-N/3,-N/3);
-				UU= min1(N/3,p[pp]+N/3);
+				LL= std::max(p[pp]-N/3,-N/3);
+				UU= std::min(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
 
@@ -420,8 +418,8 @@ for (int realization=0;realization<QW;realization++){
 			for (pp=0;pp<N;pp++){
 
 
-				LL= max1(p[pp]-N/3,-N/3);
-				UU= min1(N/3,p[pp]+N/3);
+				LL= std::max(p[pp]-N/3,-N/3);
+				UU= std::min(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
 
@@ -451,8 +449,8 @@ for (int realization=0;realization<QW;realization++){
 				SSn[1]=distribution(generator)*Source_factor_n[pp]/sqrt(Tstep);
 
 
-				LL= max1(p[pp]-N/3,-N/3);
-				UU= min1(N/3,p[pp]+N/3);
+				LL= std::max(p[pp]-N/3,-N/3);
+				UU= std::min(N/3,p[pp]+N/3);
 				CC[0]=0.0;
 				CC[1]=0.0;
 				for (int q=LL;q<=UU;q++){
@@ -563,22 +561,6 @@ for (int realization=0;realization<QW;realization++){
 int sign (double a) {
 	return (a>0)-(a<0);
 }
-
-
-int max1(int a, int b){
-	if (a>b)
-		return a;
-	else
-		return b;
-}
-
-int min1(int a, int b){
-	if (a<b)
-		return a;
-	else
-		return b;
-}
-
 
 void Xsection(double& Xsec_ion, double& Xsec_pl,double k){
 	double alpha=1.0/(k*lambdaD);

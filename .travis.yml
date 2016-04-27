@@ -19,20 +19,9 @@ matrix:
           packages: ['g++-5','libboost-filesystem-dev','libboost-program-options-dev']
       env: CXX=g++-5
 
-    - os: linux
-      compiler: clang
-      addons:
-        apt:
-          sources: 
-          packages: ['libboost-filesystem-dev','libboost-program-options-dev']
-      env: CXX=clang++-3.8
-
     - os: osx
       compiler: clang
       env: CXX=clang++
-
-before_install:
-    - ./.travis.sh
 
 script: 
     - cd bin

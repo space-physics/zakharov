@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 project(zahkarov CXX)
 
-add_compile_options(-mtune=native -Wall -Wextra -Wpedantic -fexceptions -Warray-bounds=2)
+add_compile_options(-mtune=native -Wall -Wextra -Wpedantic -fexceptions -Warray-bounds)
 
 add_executable(zakh zakh.cpp)
 set_target_properties(zakh PROPERTIES CXX_STANDARD 14)

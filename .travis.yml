@@ -23,14 +23,16 @@ matrix:
       compiler: clang
       addons:
         apt:
-          sources: ['llvm-toolchain-trusty-3.8']
-          packages: ['clang-3.8','libboost-filesystem-dev','libboost-program-options-dev']
+          sources: 
+          packages: ['libboost-filesystem-dev','libboost-program-options-dev']
       env: CXX=clang++-3.8
 
     - os: osx
       compiler: clang
       env: CXX=clang++
 
+before_install:
+    - ./.travis.sh
 
 script: 
     - cd bin

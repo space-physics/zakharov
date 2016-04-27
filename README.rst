@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/scienceopen/zakharov.svg?branch=master
+    :target: https://travis-ci.org/scienceopen/zakharov
+
 ================================
 Langmuir-1D Simulation
 ================================

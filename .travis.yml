@@ -1,0 +1,27 @@
+language: cpp
+
+sudo: true
+dist: trusty
+
+notifications:
+  email: false
+
+git:
+  depth: 1
+
+addons:
+  apt:
+    packages:
+      - libboost-filesystem-dev
+      - libboost-program-options-dev
+
+compiler: 
+    - gcc
+    - clang
+
+
+script: 
+    - cd bin
+    - cmake ..
+    - make
+

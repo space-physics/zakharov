@@ -16,7 +16,7 @@ addons:
     - llvm-toolchain-trusty
     packages:
       - g++-5
-      - clang++-3.8
+      - clang-3.8
       - libboost-filesystem-dev
       - libboost-program-options-dev
 

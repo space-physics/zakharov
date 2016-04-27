@@ -17,11 +17,13 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-5','libboost-filesystem-dev','libboost-program-options-dev']
-      env: COMP=g++-5
+      env: 
+        - COMP=g++-5
 
     - os: osx
       compiler: clang
-      env: COMP=clang++
+      env: 
+        - COMP=clang++
 
 script: 
     - cd bin

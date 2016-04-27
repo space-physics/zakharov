@@ -9,20 +9,28 @@ notifications:
 git:
   depth: 1
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-trusty
-    packages:
-      - g++-5
-      - clang-3.8
-      - libboost-filesystem-dev
-      - libboost-program-options-dev
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-5']
+      env: CXX=g++-5
 
-compiler: 
-    - gcc
-    - clang
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources: ['llvm-toolchain-trusty']
+          packages: ['clang-3.8']
+      env: CXX=clang++-3.8
+
+    - os: osx
+      compiler: clang
+      env: CXX=clang++
+
 
 script: 
     - cd bin

@@ -8,11 +8,18 @@ Originally authored by Hassanali Akbari as part of his PhD work.
 
 :author: Hassanali Akbari, Michael Hirsch
 
+.. contents::
+
 Prereq
 ======
-compiles on any OS, for Linux::
+
+Linux / BSD / Windows::
 
     sudo apt-get install g++ cmake libboost-filesystem-dev libboost-program-options-dev
+    
+Mac::
+
+    brew install boost
 
 
 Setup
@@ -28,3 +35,6 @@ Usage
 ::
 
     ./zahk
+    
+--ev    beam energy
+-o      output directory (will be created if it doesn't exist)

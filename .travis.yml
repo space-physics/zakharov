@@ -1,0 +1,30 @@
+language: cpp
+
+sudo: true
+dist: trusty
+
+notifications:
+  email: false
+
+git:
+  depth: 1
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-5','libboost-filesystem-dev','libboost-program-options-dev']
+      env: COMP=g++-5
+
+    - os: osx
+      compiler: clang
+      env: COMP=clang++
+
+script: 
+    - cd bin
+    - CXX=$COMP cmake ..
+    - make VERBOSE=1
+

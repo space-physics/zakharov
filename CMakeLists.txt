@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.12)
 project(zahkarov CXX)
 
-add_compile_options(-mtune=native -ffast-math -Wall -Wextra -Wpedantic -fexceptions -Warray-bounds)
+add_compile_options(-mtune=native -Wall -Wextra -Wpedantic -fexceptions -Warray-bounds)
 
 add_executable(zakh zakh.cpp)
 target_compile_options(zakh PRIVATE "-std=c++11")

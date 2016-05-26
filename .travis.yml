@@ -1,8 +1,5 @@
 language: cpp
 
-sudo: true
-dist: trusty
-
 notifications:
   email: false
 
@@ -12,6 +9,8 @@ git:
 matrix:
   include:
     - os: linux
+      sudo: true
+      dist: trusty
       compiler: gcc
       addons:
         apt:

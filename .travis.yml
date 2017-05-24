@@ -1,32 +1,25 @@
 language: cpp
 
+os:
+  - linux
+  
+dist: trusty
+
 notifications:
   email: false
 
 git:
   depth: 3
 
-matrix:
-  include:
-    - os: linux
-      sudo: true
-      dist: trusty
-      compiler: gcc
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-5','libboost-filesystem-dev','libboost-program-options-dev']
-      env: 
-        - COMP=g++-5
+addons:
+  apt:
+    sources: ['ubuntu-toolchain-r-test']
+    packages: ['g++','libboost-filesystem-dev','libboost-program-options-dev']
 
-    - os: osx 
-      osx_image: xcode8 # whatever the latest is
-      compiler: clang
-      env: 
-        - COMP=clang++
-
-script: 
+install: 
     - cd bin
-    - CXX=$COMP cmake ..
-    - make VERBOSE=1
+    - cmake ..
+    
+script:
+    - make
 

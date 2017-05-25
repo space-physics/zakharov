@@ -1,7 +1,7 @@
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.168586.svg
    :target: https://doi.org/10.5281/zenodo.168586
-.. image:: https://travis-ci.org/scienceopen/zakharov.svg?branch=master
-    :target: https://travis-ci.org/scienceopen/zakharov
+.. image:: https://travis-ci.org/scivision/zakharov.svg?branch=master
+    :target: https://travis-ci.org/scivision/zakharov
 
 ================================
 Langmuir-1D Simulation

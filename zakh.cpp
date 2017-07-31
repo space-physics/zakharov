@@ -138,7 +138,7 @@ int main(int argc, char ** argv)
             std::cout << "created output directory " << outDir << std::endl;
     }
     else{
-        std::cout << "using output directory " << outDir << std::endl;
+        std::cout << "using existing output directory " << outDir << std::endl;
     }
 //-------------------------------------------------------------------------------------
     printf("Nnbeam=%i \n",Nnbeam);

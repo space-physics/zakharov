@@ -4,13 +4,13 @@ project(zahkarov CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-mtune=native -Wall -Wextra -Wpedantic -fexceptions -Warray-bounds)
+add_compile_options(-O3 -mtune=native -Wall -Wextra -Wpedantic -fexceptions -Warray-bounds -fstack-protector)
 
 #------------
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIR})
 
 
 add_executable(zakh zakh.cpp)
-target_link_libraries(zakh ${Boost_LIBRARIES})
+target_link_libraries(zakh -lboost_system -lboost_filesystem -lboost_program_options)
 

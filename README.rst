@@ -18,13 +18,13 @@ Originally authored by Hassanali Akbari as part of his PhD work.
 Prereq
 ======
 
-Linux / BSD / Windows::
+Linux / BSD / Windows Subsystem for Linux::
 
-    sudo apt-get install g++ cmake libboost-filesystem-dev libboost-program-options-dev
+    apt install g++ cmake libboost-filesystem-dev libboost-program-options-dev
     
 Mac::
 
-    brew install boost
+    brew install gcc boost
 
 
 Setup

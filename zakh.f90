@@ -269,6 +269,8 @@ do realization=1,QW
 
 !   main loops
 
+vv(:,:,:)=0.0_wp
+
   do iij1=1,4
     do iij2=1,N
       call random_number(rdist)
@@ -280,17 +282,13 @@ do realization=1,QW
       call random_number(rdist)
       nn (iij1,iij2,2)=sqrt(output1(iij2,6)/2.0)*rdist
 
-      vv(iij1,iij2,1)=0.0_wp
-      vv(iij1,iij2,2)=0.0_wp
-
     enddo ! iij2 N
 
     nn(iij1,N-1:N/2,1) = nn(iij1,N-1:N/2,1)
 
-    nn (iij1,N/2,1)=0
-    nn (iij1,N/2,2)=0
-
   end do ! iij1 4
+
+  nn (:,N/2,:)=0.0_wp
 
   counter1=0
   do tt1=1,TT

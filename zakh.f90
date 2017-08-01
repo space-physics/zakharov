@@ -401,13 +401,10 @@ vv(:,:,:)=0.0_wp
         CC(2)=CC(2)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,1)-EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,2);
       end do
 
-      kn1(1)=Tstep*(vv(c1,pp,1));
-      kn1(2)=Tstep*(vv(c1,pp,2));
-      kv1(1)=Tstep*((-2.0)*nui(pp)*vv(c1,pp,1)- Cs*k(pp)**2 *nn(c1,pp,1)-k(pp)*k(pp)*epsilon0/4/mi*CC(1));
-      kv1(2)=Tstep*((-2.0)*nui(pp)*vv(c1,pp,2)- Cs*k(pp)**2 *nn(c1,pp,2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2));
+      kn1(:)=Tstep*(vv(c1,pp,:))
+      kv1(:)=Tstep*((-2.0)*nui(pp)*vv(c1,pp,:)- Cs*k(pp)**2 *nn(c1,pp,:)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
 
-      CC(1)=0.0;
-      CC(2)=0.0;
+      CC(:)=0.0_wp
 
       do q=LL,UU
         CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)+ &
@@ -462,8 +459,7 @@ vv(:,:,:)=0.0_wp
       vv(c2,pp,2)=vv(c1,pp,2)+(kv1(2)+2*kv2(2)+2*kv3(2)+kv4(2))/6+SSn(2)*Tstep;
       nn(c2,pp,1)=nn(c1,pp,1)+(kn1(1)+2*kn2(1)+2*kn3(1)+kn4(1))/6;
       nn(c2,pp,2)=nn(c1,pp,2)+(kn1(2)+2*kn2(2)+2*kn3(2)+kn4(2))/6;
-      nn(c2,N/2,1)=0.0_wp
-      nn(c2,N/2,2)=0.0_wp
+      nn(c2,N/2,:)=0.0_wp
 
       if (pp>=1) then
         nn(c2,N-pp,1)=nn(c2,pp,1);
@@ -474,7 +470,7 @@ vv(:,:,:)=0.0_wp
 
     if ( mod(tt1,res) == 1) then
       do pp=1,N
-        ! FIXME: reshape, transpose  to vectorize ?
+        ! FIXME: reshape, transpose  to vectorize
         total_EE(counter1*N*2+pp*2+1:counter1*N*2+pp*2+2)=EE(c2,pp,:)
         total_nn(counter1*N*2+pp*2+1:counter1*N*2+pp*2+2)=nn(c2,pp,:)
       end do ! pp N

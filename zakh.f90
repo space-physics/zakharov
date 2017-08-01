@@ -437,23 +437,18 @@ vv(:,:,:)=0.0_wp
               (EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
       end do
 
-      kn4(1)=Tstep*(vv(c1,pp,1)+kv3(1)+SSn(1)*Tstep);
-      kn4(2)=Tstep*(vv(c1,pp,2)+kv3(2)+SSn(2)*Tstep);
-      kv4(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv3(1)+SSn(1)*Tstep) - &
-             Cs*k(pp)**2 *(nn(c1,pp,1)+kn3(1))-k(pp)*k(pp)*epsilon0/4/mi*CC(1));
-      kv4(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv3(2)+SSn(2)*Tstep) - &
-             Cs*k(pp)**2 *(nn(c1,pp,2)+kn3(2))-k(pp)*k(pp)*epsilon0/4/mi*CC(2));
+      kn4(:)=Tstep*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep)
+      kv4(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep) - &
+             Cs*k(pp)**2 *(nn(c1,pp,:)+kn3(:))-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
 
 
-      vv(c2,pp,1)=vv(c1,pp,1)+(kv1(1)+2*kv2(1)+2*kv3(1)+kv4(1))/6+SSn(1)*Tstep;
-      vv(c2,pp,2)=vv(c1,pp,2)+(kv1(2)+2*kv2(2)+2*kv3(2)+kv4(2))/6+SSn(2)*Tstep;
-      nn(c2,pp,1)=nn(c1,pp,1)+(kn1(1)+2*kn2(1)+2*kn3(1)+kn4(1))/6;
-      nn(c2,pp,2)=nn(c1,pp,2)+(kn1(2)+2*kn2(2)+2*kn3(2)+kn4(2))/6;
+      vv(c2,pp,:)=vv(c1,pp,:)+(kv1(:)+2*kv2(:)+2*kv3(:)+kv4(:))/6+SSn(:)*Tstep
+      nn(c2,pp,:)=nn(c1,pp,:)+(kn1(:)+2*kn2(:)+2*kn3(:)+kn4(:))/6
       nn(c2,N/2,:)=0.0_wp
 
       if (pp>=1) then
-        nn(c2,N-pp,1)=nn(c2,pp,1);
-        nn(c2,N-pp,2)=-nn(c2,pp,2);
+        nn(c2,N-pp,1)=nn(c2,pp,1)
+        nn(c2,N-pp,2)=-nn(c2,pp,2)
       end if
 
     end do ! pp N/2

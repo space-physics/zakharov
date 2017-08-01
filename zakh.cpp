@@ -8,6 +8,7 @@
 #include "boost/program_options.hpp"
 #include <iostream>
 #include <vector>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <random>
@@ -169,8 +170,7 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 
 	int p[N];
 	double k[N];
-	double Xsection_ion=0.0;
-	double Xsection_pl=0.0;
+	double Xsection_ion, Xsection_pl;
 	double E_thermal_k_squared;
 	double n_thermal_k_squared;
 	double Source_factor_E[N];
@@ -232,18 +232,21 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 		p[ii]=ii-N/2;
 		if (ii==N/2){
 			k[ii]=0;
-			Xsection_ion=0;
-			Xsection_pl=0;
+			Xsection_ion=0.;
+			Xsection_pl=0.;
 			n_thermal_k_squared=0.0;
 			E_thermal_k_squared=0.0;
 		}
 		else{
 		k[ii]=2*pi*p[ii]/N/Xstep;
+
 		Xsection(Xsection_ion,Xsection_pl,k[ii]);
 		Xsection_ion=Xsection_ion/N/N;
 		Xsection_pl=Xsection_pl/N/N;
+
 		n_thermal_k_squared=Xsection_ion*n0;
 		E_thermal_k_squared=Xsection_pl *n0*pow(electroncharge/epsilon0/k[ii],2);
+
 		}
 		omegaL[ii]=sqrt(pow(omegae,2)+3*pow(k[ii]*ve,2));
 		gamas= (-1)*sqrt(pi/8)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)-1.5))*std::fabs(k[ii])*Cs;
@@ -283,6 +286,11 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 		output1[ii][11]=Source_factor_n[ii];
 	}
 
+//  for (int i=0; i<12;i++){
+//    std::cout << output1[1][i] << std::endl;
+//    }
+
+
   char fno[256];
 	std::sprintf(fno,"%soutput1_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
 
@@ -293,7 +301,7 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	std::cout << "Wrote " << bout << " bytes to " << fno << std::endl;
 
 
-	static double EE [3][N][2];
+  std::array<std::array<std::array<double, 3>, N>, 2> EE;
 	static double nn [3][N][2];
 	static double vv [3][N][2];
 	int LL,UU,pp;
@@ -348,6 +356,10 @@ for (int realization=0;realization<QW;realization++){
 
 
     }
+
+  //  for(const auto& s: EE)
+    //    std::cout << s << ' ';
+  
 
 	int counter1=0;
 	for (int tt1=1;tt1<=TT;tt1++){
@@ -582,4 +594,7 @@ void Xsection(double& Xsec_ion, double& Xsec_pl,double k){
 	Xsec_ion=2*pi/(1+pow(alpha,2))*(Z*pow(alpha,4)/(1+pow(alpha,2)+pow(alpha,2)*(Z*Te/Ti)));
 	double XX=2*pi*(1+pow(alpha,2)*Z*Te/Ti)/(1+pow(alpha,2)+pow(alpha,2)*(Z*Te/Ti));
 	Xsec_pl=XX-Te/Ti*Xsec_ion;
+
+  //std::cout << k <<" " << alpha << " "<< Xsec_ion << " " << XX << " " << Xsec_pl << std::endl;
+
 }

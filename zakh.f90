@@ -137,7 +137,7 @@ do beami=1,Nnbeam
 do beamj=1,Nvbeam
 
 ! TODO: may have blank spaces in filename
-  write(argv,*)  odir//"/parameters_n" , beami, "_v" , beamj
+  write(argv,'(A,I0.3,A,I0.3)')  odir//"/parameters_n" , beami, "_v" , beamj
   ofn = trim(argv)
 
   open(newunit=u,file=ofn,status='unknown',action='write')
@@ -211,7 +211,7 @@ do beamj=1,Nvbeam
     output1(ii,12) = Source_factor_n(ii)
   end do ! ii
 
-  write(argv,*) odir//"output1_n",beami,"_v", beamj
+  write(argv,'(A,I0.3,A,I0.3)') odir//"output1_n",beami,"_v", beamj
   open(newunit=u,file=trim(argv),status='unknown',action='write')
 
   write(u,*) output1
@@ -229,10 +229,10 @@ do realization=1,QW
   seed = clock + 37 * [ (i - 1, i = 1, nseed) ]
   call random_seed(put=seed)
 
-  write(argv,*) odir//"EE",realization,"_n",beami,"_v",beamj
+  write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"EE",realization,"_n",beami,"_v",beamj
   open(newunit=uEE,file=trim(argv), status='unknown',action='write')
 
-  write(argv,*) odir//"nn",realization, "_n" ,beami, "_v",beamj
+  write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"nn",realization, "_n" ,beami, "_v",beamj
   open(newunit=uNN,file=trim(argv), status='unknown',action='write')
 
 !   main loops
@@ -272,7 +272,8 @@ do realization=1,QW
 !		long double omega_off=omegae+2*pi*300000;
 
 		! update display every 50th iteration
-    if (mod(tt1,50) == 0) print *,"Realization:",realization+1,tt1*100.0/TT,"complete_n",beami,"_v",beamj
+    if (mod(tt1,50) == 0) print '(A,I0.3,F5.2,A,I0.3,A,I0.3)',"Realization:",&
+        realization+1,tt1*100.0/TT,"% complete.  n",beami,"v",beamj
 
     do pp=1,N
 

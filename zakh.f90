@@ -281,15 +281,12 @@ vv(:,:,:)=0.0_wp
       nn (iij1,iij2,1)=sqrt(output1(iij2,6)/2.0)*rdist
       call random_number(rdist)
       nn (iij1,iij2,2)=sqrt(output1(iij2,6)/2.0)*rdist
-
     enddo ! iij2 N
-
-    nn(iij1,N-1:N/2,1) = nn(iij1,N-1:N/2,1)
-    nn(iij1,N-1:N/2,2) = -nn(iij1,N-1:N/2,2) ! yes minus
-
   end do ! iij1 4
 
-  nn (:,N/2,:)=0.0_wp
+  nn(:,N-1:N/2,1) = nn(:,1:N/2,1)
+  nn(:,N-1:N/2,2) = -nn(:,1:N/2,2) ! yes minus
+  nn(:,N/2,:)=0.0_wp
 
   counter1=0
   do tt1=1,TT

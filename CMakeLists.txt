@@ -4,7 +4,7 @@ project(zahkarov CXX Fortran)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-O3 -mtune=native -Wall -Wextra -Wpedantic -fexceptions -Warray-bounds -fstack-protector)
+add_compile_options(-O3 -mtune=native -g -Wall -Wextra -Wpedantic -fexceptions -Warray-bounds -fstack-protector)
 
 #------------
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options)

@@ -284,8 +284,8 @@ vv(:,:,:)=0.0_wp
     enddo ! iij2 N
   end do ! iij1 4
 
-  nn(:,N-1:N/2,1) = nn(:,1:N/2,1)
-  nn(:,N-1:N/2,2) = -nn(:,1:N/2,2) ! yes minus
+  nn(:,N-N/2+1:N,1) = nn(:,1:N/2,1)
+  nn(:,N-N/2+1:N,2) = -nn(:,1:N/2,2) ! yes minus
   nn(:,N/2,:)=0.0_wp
 
   counter1=0

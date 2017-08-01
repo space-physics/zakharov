@@ -103,34 +103,34 @@ fnEE=[newpath,filesep,'EE' num2str(P.SEED,'%03d'), num2str(ii,'%03d'), '_n' num2
 nn2=abs(nnComplex).^2;
 EE2=abs(EEComplex).^2;
 
-display('entering for jj=1:bb')
-    for jj=1:bb
-        
-        %for ttt=1:TT_res
-            %baseInd1 = (ttt-1)*N*2+(kk_ss(jj)-1)*2+1;
-            %baseInd2 = baseInd1+1;  
-            %buffer1(1,ttt)=abs(EE(baseInd1)+1j*EE(baseInd2)).^2;
-            %buffer2(1,ttt)=abs(nn(baseInd1)+1j*nn(baseInd2)).^2;
-            %{
-            baseInd = (ttt-1)*N + (kk_ss(jj)-1) + 1;
-            buffer1(1,ttt) = EE2(baseInd);
-            buffer2(1,ttt) = nn2(baseInd);
-            %}
-        %end
 
-        ttt = 1:P.TT_res;
-        baseInd = (ttt-1).*N + kk_ss(jj);
-        
-        EE_ss(jj,:)=EE_ss(jj,:) +EE2(baseInd); %+buffer1(1,:);    
-        nn_ss(jj,:)=nn_ss(jj,:) +nn2(baseInd); %+buffer2(1,:);
-        %figure(2*jj-1);
-        %hold on;
-        %plot(taxis,buffer1(1,:),'b');
-        %figure(2*jj);
-        %hold on;'E_kt'
-        %plot(taxis,buffer2(1,:),'b');
-        if ~mod(jj,500), display(['jj/bb: ',num2str(jj/bb*100,'%0.2f'),'% complete']), end
-    end
+  for jj=1:bb
+      
+    %for ttt=1:TT_res
+        %baseInd1 = (ttt-1)*N*2+(kk_ss(jj)-1)*2+1;
+        %baseInd2 = baseInd1+1;  
+        %buffer1(1,ttt)=abs(EE(baseInd1)+1j*EE(baseInd2)).^2;
+        %buffer2(1,ttt)=abs(nn(baseInd1)+1j*nn(baseInd2)).^2;
+        %{
+        baseInd = (ttt-1)*N + (kk_ss(jj)-1) + 1;
+        buffer1(1,ttt) = EE2(baseInd);
+        buffer2(1,ttt) = nn2(baseInd);
+        %}
+    %end
+
+    ttt = 1:P.TT_res;
+    baseInd = (ttt-1).*N + kk_ss(jj);
+    
+    EE_ss(jj,:)=EE_ss(jj,:) +EE2(baseInd); %+buffer1(1,:);    
+    nn_ss(jj,:)=nn_ss(jj,:) +nn2(baseInd); %+buffer2(1,:);
+    %figure(2*jj-1);
+    %hold on;
+    %plot(taxis,buffer1(1,:),'b');
+    %figure(2*jj);
+    %hold on;'E_kt'
+    %plot(taxis,buffer2(1,:),'b');
+    if ~mod(jj,500), disp(['jj/bb: ',num2str(jj/bb*100,'%0.2f'),'% complete']), end
+  end
 
 
 %floor(ii/QW*100)

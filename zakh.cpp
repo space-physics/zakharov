@@ -7,6 +7,7 @@
 #include <boost/filesystem.hpp>
 #include "boost/program_options.hpp"
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <array>
 #include <cstdio>
@@ -183,8 +184,8 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	double gamal3;
 	double gamal;
 	double nue[N];
-	double parameters[32];
-	double output1[N][12];
+std::vector<double> parameters(32);
+std::vector<std::vector<double> > output1(N, std::vector<double> (12));
 
 	parameters[0]=pi;
 	parameters[1]=me;
@@ -222,11 +223,12 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 
   char fnp[256];
 	std::sprintf(fnp, "%sparameters_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
-	FILE* parameters_out;
-	parameters_out = fopen(fnp, "wb");
-	int bout=fwrite(parameters, 1, sizeof(parameters), parameters_out);
-	fclose(parameters_out);
-	std::cout << "Wrote " << bout << " bytes to " << fnp << std::endl;
+  {
+	std::ofstream FILE(fnp, std::ios::out | std::ios::binary);
+  FILE.write(reinterpret_cast<char*>(&parameters[0]), parameters.size()*sizeof(double));
+	FILE.close();
+  }
+	std::cout << "Wrote " << fnp << std::endl;
 
 	for (int ii=0;ii<N;ii++){
 		p[ii]=ii-N/2;
@@ -293,15 +295,29 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 
   char fno[256];
 	std::sprintf(fno,"%soutput1_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
+  {
+  std::ofstream FILE(fno, std::ios::out | std::ios::binary);
 
-	FILE* output1_out;
-	output1_out = fopen(fno, "wb");
-	bout = fwrite(output1, 1, sizeof(output1), output1_out);
-	fclose(output1_out);
-	std::cout << "Wrote " << bout << " bytes to " << fno << std::endl;
+  int s = output1.size();
+  FILE.write(reinterpret_cast<const char *>(&s), sizeof(s));
+//https://stackoverflow.com/questions/43230542/write-vectorvectorfloat-to-binary-file
+   // Now write each vector one by one
+   for (auto& v : output1) {
+       // Store its size
+      // int size = v.size();
+      // FILE.write(reinterpret_cast<const char *>(&size), sizeof(size));
+
+       // Store its contents
+       FILE.write(reinterpret_cast<const char *>(&v[0]), v.size()*sizeof(double));
+    }
+  FILE.close();
+  }
+	std::cout << "Wrote " << fno << std::endl;
 
 
-  std::array<std::array<std::array<double, 3>, N>, 2> EE;
+  //std::array<std::array<std::array<double, 3>, N>, 2> EE;
+//  std::vector<std::vector<std::vector<double> > > EE (3,vector<vector<double> >(N,vector <double>(2)));
+  double EE[3][N][2];
 	static double nn [3][N][2];
 	static double vv [3][N][2];
 	int LL,UU,pp;
@@ -312,10 +328,6 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	double cte2=omegae/2.0/n0/1;
 	double k1[N][2],k2[N][2],k3[N][2],k4[N][2];
 	double kn1[2], kn2[2], kn3[2], kn4[2], kv1[2], kv2[2], kv3[2], kv4[2];
-  const int Nwb = 200; //arbitrary
-	static double total_EE[Nwb*N*2+N*2+2];
-	static double total_nn[Nwb*N*2+N*2+2];
-
 
 for (int realization=0;realization<QW;realization++){
 
@@ -326,13 +338,13 @@ for (int realization=0;realization<QW;realization++){
 
   char nameE[256];
 	std::sprintf(nameE,"%sEE%03d%03d_n%03d_v%03d.bin",outDir.c_str(),SEED,realization+1,beami+1,beamj+1);
-	FILE* EE_out;
-	EE_out = fopen(nameE, "wb");
+	std::ofstream EE_out;
+	EE_out.open(nameE, std::ios::out | std::ios::binary);
 
   char namen[256];
 	std::sprintf(namen,"%snn%03d%03d_n%03d_v%03d.bin",outDir.c_str(),SEED,realization+1,beami+1,beamj+1);
-	FILE* nn_out;
-	nn_out = fopen(namen, "wb");
+	std::ofstream nn_out;
+	nn_out.open(namen, std::ios::out | std::ios::binary);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////   main loops
 
@@ -359,9 +371,8 @@ for (int realization=0;realization<QW;realization++){
 
   //  for(const auto& s: EE)
     //    std::cout << s << ' ';
-  
 
-	int counter1=0;
+
 	for (int tt1=1;tt1<=TT;tt1++){
 
 //		int c0=(tt1-1) % 3;
@@ -371,7 +382,7 @@ for (int realization=0;realization<QW;realization++){
 
 					//update display every 50th iteration
 		if (tt1 % 50 == 0){
-		printf("Realization: %i ,  %0.2f%% complete_n%d_v%d \n",realization+1, tt1*100.0/TT,  beami, beamj);
+		printf("Realization: %03i ,  %0.2f%% complete n%03d v%03d \n",realization+1, tt1*100.0/TT,  beami, beamj);
                 }
 
 			for (pp=0;pp<N;pp++){
@@ -541,34 +552,25 @@ for (int realization=0;realization<QW;realization++){
 				}
 
 			}
+// main file output
+      double obufEE[2];
+      double obufnn[2];
 
 			if ( (tt1)%res == 1){
 				for (pp=0;pp<N;pp++){
-					total_EE[counter1*N*2+pp*2+0]=EE[c2][pp][0];
-					total_EE[counter1*N*2+pp*2+1]=EE[c2][pp][1];
-					total_nn[counter1*N*2+pp*2+0]=nn[c2][pp][0];
-					total_nn[counter1*N*2+pp*2+1]=nn[c2][pp][1];
+					obufEE[0]=EE[c2][pp][0];
+					obufEE[1]=EE[c2][pp][1];
+					obufnn[0]=nn[c2][pp][0];
+					obufnn[1]=nn[c2][pp][1];
+
+          EE_out.write(reinterpret_cast<char *> (&obufEE), sizeof(obufEE));
+          nn_out.write(reinterpret_cast<char *> (&obufnn), sizeof(obufnn));
 				}
-				counter1++;
-			}
-
-			if (counter1==Nwb){
-				fwrite(total_EE, 1, sizeof(total_EE), EE_out);
-				fwrite(total_nn, 1, sizeof(total_nn), nn_out);
-				counter1=0;
-			}
-
+			} // if tt1%res==1
 		} // tt1
-
-	if (counter1>0){
-		fwrite(total_EE, 1, sizeof(double)*counter1*N*2, EE_out);
-		fwrite(total_nn, 1, sizeof(double)*counter1*N*2, nn_out);
-	}
-
-
-	fclose(EE_out);
-	fclose(nn_out);
-}//relizations
+	EE_out.close();
+	nn_out.close();
+}//realizations
 }//Nvbeam
 }//Nnbeam
 

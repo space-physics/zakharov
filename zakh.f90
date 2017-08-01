@@ -44,11 +44,11 @@ real(wp), parameter :: se_cte= 0.7397_wp / theta_se**3.0_wp
 
 real(wp), parameter :: endTime=100e-7_wp !100.0e-3_wp ! simulation ends (seconds)
 real(wp), parameter :: Tstep=0.5e-7_wp ! simulation time steps
-integer, parameter :: TT= floor(endTime / Tstep)              ! floor(endTime/Tstep)+2;
+integer, parameter :: TT= floor(endTime / Tstep)              ! floor(endTime/Tstep)+2
 integer, parameter :: res=20
-integer, parameter :: TT_res = floor(endTime/Tstep/res)  !floor(endTime/Tstep/res);
+integer, parameter :: TT_res = floor(endTime/Tstep/res)  !floor(endTime/Tstep/res)
 real(wp), parameter :: L=70.0_wp           ! simulation box length (meter)j
-integer, parameter :: N=2046          ! number of samples in L; should be devidable by 6
+integer, parameter :: N=2046          ! number of samples in L should be devidable by 6
 real(wp), parameter :: Xstep= L / N
 integer, parameter :: QW=1     ! number of realizations
 
@@ -197,8 +197,8 @@ do beamj=1,Nvbeam
 
     omegaL(ii)=sqrt(omegae**2.0_wp+3*k(ii)*ve**2.0_wp)
     gamas= (-1)*sqrt(pi/8)*(sqrt(me/mi)+ Te/Ti**2.0_wp/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)-1.5))*abs(k(ii))*Cs
-		!gamas= (-1)*sqrt(pi/2)*(sqrt(me/mi)+4*pow(Te/2/Ti,2)/sqrt(Te/2/Ti)*exp((-1)*(Te*4/Ti)))*abs(k(ii))*Cs*10;   //based on Robinson 2002
-		!gamas= (-1)*sqrt(pi/8)*pow(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te,2)/sqrt(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)/(1+k(ii)*k(ii)*lambdaD*lambdaD)-1.5))*abs(k(ii))*Cs;   //Based on some Chinese paper!!
+		!gamas= (-1)*sqrt(pi/2)*(sqrt(me/mi)+4*pow(Te/2/Ti,2)/sqrt(Te/2/Ti)*exp((-1)*(Te*4/Ti)))*abs(k(ii))*Cs*10   //based on Robinson 2002
+		!gamas= (-1)*sqrt(pi/8)*pow(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te,2)/sqrt(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)/(1+k(ii)*k(ii)*lambdaD*lambdaD)-1.5))*abs(k(ii))*Cs   //Based on some Chinese paper!!
     nui(ii)=(nuic/2-gamas)
 
     if (ii==N/2) then
@@ -214,7 +214,7 @@ do beamj=1,Nvbeam
       gamal2=(-1)*sqrt(pi/8)* omegae / k(ii) / tetabeam(beamj)**2.0_wp * sign(1.0_wp,k(ii)) * nbeam(beami) / &
               n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam(beamj)) / (k(ii)*tetabeam(beamj)) * &
               exp((-1)* omegaL(ii)-k(ii)*vbeam(beamj) / k(ii) / tetabeam(beamj)**2.0_wp/2) !Landau damping due to the beam
-!gamal2=(-1)*sqrt(pi/8)*pow(omegae/k(ii)/tetabeam.at(beamj),2)* sign(1,k(ii)) *nbeam.at(beami)/n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam.at(beamj))/(k(ii)*tetabeam.at(beamj))*exp((-1)*pow((omegaL(ii)-k(ii)*vbeam.at(beamj))/k(ii)/tetabeam.at(beamj),2)/2);  //Landau damping due to the beam
+!gamal2=(-1)*sqrt(pi/8)*pow(omegae/k(ii)/tetabeam.at(beamj),2)* sign(1,k(ii)) *nbeam.at(beami)/n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam.at(beamj))/(k(ii)*tetabeam.at(beamj))*exp((-1)*pow((omegaL(ii)-k(ii)*vbeam.at(beamj))/k(ii)/tetabeam.at(beamj),2)/2)  //Landau damping due to the beam
       gamal3=(-1)*sqrt(pi)*omegae*omegaL(ii)**2.0_wp / k(ii)**3.0_wp * sign(1.0_wp,k(ii)) *se_cte * &
               (1+ omegaL(ii)**2.0_wp/kappa/ k(ii)*theta_se**2.0_wp)**((-1)*(kappa+1))
 
@@ -287,10 +287,10 @@ do beamj=1,Nvbeam
 
     do tt1=1,TT
 
-  !		int c0=(tt1-1) % 3;
+  !		int c0=(tt1-1) % 3
       c1= mod(tt1, 3)+1
       c2= mod(tt1+1, 3)+1
-  !		long double omega_off=omegae+2*pi*300000;
+  !		long double omega_off=omegae+2*pi*300000
 
   		! update display every 50th iteration
       if (mod(tt1,50) == 0) print '(A,I0.3,F7.2,A,I0.3,A,I0.3)',"Realization: ",&
@@ -304,14 +304,14 @@ do beamj=1,Nvbeam
 
         do q=LL,UU
           CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
-          CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1);
+          CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1)
         end do
 
         call random_number(rdist(:2))
         SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
 
         cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
+  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
         k1(pp,2)=Tstep*((-1)*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
       end do ! pp N
@@ -328,7 +328,7 @@ do beamj=1,Nvbeam
         end do
 
         cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
+  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k2(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
                   nuE(pp) * (EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
         k2(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
@@ -343,35 +343,35 @@ do beamj=1,Nvbeam
         CC(:)=0.0_wp
 
         do q=LL,UU
-          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,2);
-          CC(2)=CC(2)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1);
+          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,2)
+          CC(2)=CC(2)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1)
         end do
 
         cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
+  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k3(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
-                nuE(pp)*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2));
+                nuE(pp)*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
         k3(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
-                nuE(pp)*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1));
+                nuE(pp)*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1))
 
       end do ! pp N
 
 
       do pp=1,N
-        LL= max(p(pp)-N/3,-N/3);
-        UU= min(N/3,p(pp)+N/3);
+        LL= max(p(pp)-N/3,-N/3)
+        UU= min(N/3,p(pp)+N/3)
         CC(:)=0.0_wp
 
         do q=LL,UU
           ! no vect
-          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,2);
-          CC(2)=CC(2)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,1);
+          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,2)
+          CC(2)=CC(2)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,1)
         end do
 
 
         cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
-        k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2));
+  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
+        k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2))
         k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1))
 
         EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep ! no vect
@@ -382,16 +382,16 @@ do beamj=1,Nvbeam
 
       do pp=1,N/2
         call random_number(rdist(:2))
-        SSn(:)= rdist(:2)*Source_factor_n(pp)/sqrt(Tstep);
+        SSn(:)= rdist(:2)*Source_factor_n(pp)/sqrt(Tstep)
 
-        LL= max(p(pp)-N/3,-N/3);
-        UU= min(N/3,p(pp)+N/3);
+        LL= max(p(pp)-N/3,-N/3)
+        UU= min(N/3,p(pp)+N/3)
         CC(:)=0.0_wp
 
         do q=LL,UU
           ! no vect
-          CC(1)=CC(1)+EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,1)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,2);
-          CC(2)=CC(2)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,1)-EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,2);
+          CC(1)=CC(1)+EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,1)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,2)
+          CC(2)=CC(2)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,1)-EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,2)
         end do
 
         kn1(:)=Tstep*(vv(c1,pp,:))
@@ -402,9 +402,9 @@ do beamj=1,Nvbeam
         do q=LL,UU
           ! no vect
           CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)+ &
-                (EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
+                (EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2)
           CC(2)=CC(2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)- &
-                (EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
+                (EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2)
         end do
 
         kn2(:)=Tstep*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)
@@ -416,9 +416,9 @@ do beamj=1,Nvbeam
 
         do q=LL,UU
           CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) + &
-                (EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
+                (EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2)
           CC(2)=CC(2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) - &
-                (EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
+                (EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2)
         end do
 
         kn3(:)=Tstep*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep)
@@ -431,9 +431,9 @@ do beamj=1,Nvbeam
         CC(:)=0.0_wp
         do q=LL,UU
           CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) + &
-                (EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
+                (EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2)
           CC(2)=CC(2)+(EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) - &
-                (EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
+                (EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2)
         end do
 
         kn4(:)=Tstep*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep)

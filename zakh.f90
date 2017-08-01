@@ -285,6 +285,7 @@ vv(:,:,:)=0.0_wp
     enddo ! iij2 N
 
     nn(iij1,N-1:N/2,1) = nn(iij1,N-1:N/2,1)
+    nn(iij1,N-1:N/2,2) = -nn(iij1,N-1:N/2,2) ! yes minus
 
   end do ! iij1 4
 

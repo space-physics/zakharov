@@ -42,7 +42,7 @@ real(wp), parameter :: se_cte= 0.7397_wp / theta_se**3.0_wp
 
 !    Simulation parameters
 
-real(wp), parameter :: endTime=100.0e-3_wp ! simulation ends (seconds)
+real(wp), parameter :: endTime=100e-7_wp !100.0e-3_wp ! simulation ends (seconds)
 real(wp), parameter :: Tstep=0.5e-7_wp ! simulation time steps
 integer, parameter :: TT= floor(endTime / Tstep)              ! floor(endTime/Tstep)+2;
 integer, parameter :: res=20
@@ -68,7 +68,7 @@ integer :: Nnbeam
 
 character(:), allocatable :: odir, ofn
 character(256) :: argv
-integer :: argc,i, ii,iij1,counter1, q,tt1,c1,c2,beami, beamj, realization,u,uEE,uNN
+integer :: argc,i, ii,iij1, q,tt1,c1,c2,beami, beamj, realization,u,uEE,uNN
 real(wp) :: tic,toc
 
 !---- main loop variables
@@ -92,8 +92,7 @@ type(params) :: parameters
 
 
 real(wp):: EE(3,N,2), nn(3,N,2), vv(3,N,2), CC(2), SSE(N,2), SSn(2), cte1, cte2, &
-    k1(N,2), k2(N,2), k3(N,2), k4(N,2), kn1(2), kn2(2), kn3(2), kn4(2), kv1(2), kv2(2), kv3(2), kv4(2), &
-    total_EE(20000*N*2),total_nn(20000*N*2)
+    k1(N,2), k2(N,2), k3(N,2), k4(N,2), kn1(2), kn2(2), kn3(2), kn4(2), kv1(2), kv2(2), kv3(2), kv4(2)
 
 integer :: LL,UU,pp
 
@@ -286,7 +285,6 @@ vv(:,:,:)=0.0_wp
   nn(:,N-N/2+1:N,2) = -nn(:,:N/2,2) ! yes minus
   nn(:,N/2,:)=0.0_wp
 
-  counter1=0
   do tt1=1,TT
 
 !		int c0=(tt1-1) % 3;
@@ -295,8 +293,8 @@ vv(:,:,:)=0.0_wp
 !		long double omega_off=omegae+2*pi*300000;
 
 		! update display every 50th iteration
-    if (mod(tt1,50) == 0) print '(A,I0.3,A,I0.5,F5.2,A,I0.3,A,I0.3)',"Realization: ",&
-        realization," counter1 ",counter1,tt1*100.0/TT,"% complete.  n",beami," v",beamj
+    if (mod(tt1,50) == 0) print '(A,I0.3,F7.2,A,I0.3,A,I0.3)',"Realization: ",&
+        realization,tt1*100.0/TT,"% complete.  n",beami," v",beamj
 
     do pp=1,N
 
@@ -365,6 +363,7 @@ vv(:,:,:)=0.0_wp
       CC(:)=0.0_wp
 
       do q=LL,UU
+        ! no vect
         CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,2);
         CC(2)=CC(2)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,1);
       end do
@@ -373,10 +372,10 @@ vv(:,:,:)=0.0_wp
       cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
 			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
       k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2));
-      k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1));
+      k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1))
 
-      EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep
-      EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep
+      EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep ! no vect
+      EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep ! no vect
       EE(c2,N/2,:)=0.0_wp
 
 
@@ -453,28 +452,12 @@ vv(:,:,:)=0.0_wp
 
     end do ! pp N/2
 
-    if ( mod(tt1,res) == 1) then
-      do pp=1,N
-        ! FIXME: reshape, transpose  to vectorize
-        total_EE(counter1*N*2+pp*2+1:counter1*N*2+pp*2+2)=EE(c2,pp,:)
-        total_nn(counter1*N*2+pp*2+1:counter1*N*2+pp*2+2)=nn(c2,pp,:)
-      end do ! pp N
-      counter1 = counter1 + 1
-    end if
-
-    if (counter1==20000) then
-      write(uEE) total_EE
-      write(unn) total_nn
-      counter1=0
+    if ( mod(tt1,res) == 0) then
+      write(uEE) EE(c2,:,:)
+      write(unn) nn(c2,:,:)
     end if
 
   end do ! tt1
-
-  if (counter1>0) then
-    write(uEE) total_EE
-    write(uNN) total_nn
-  end if
-
 
   close(uEE)
   close(unn)

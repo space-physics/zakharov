@@ -375,137 +375,137 @@ do realization=1,QW
     end do ! pp N
 
 
+    do pp=1,N
+      LL= max(p(pp)-N/3,-N/3);
+      UU= min(N/3,p(pp)+N/3);
+      CC(1)=0.0;
+      CC(2)=0.0;
+
+      do q=LL,UU
+        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,2);
+        CC(2)=CC(2)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,1);
+      end do
+
+
+      cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
+      k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2));
+      k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1));
+
+      EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep;
+      EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep;
+      EE(c2,N/2,1)=0.0
+      EE(c2,N/2,2)=0.0
+
+
+    end do ! pp N
+
+
+    do pp=1,N/2
+      call random_number(rdist)
+      SSn(1)= rdist*Source_factor_n(pp)/sqrt(Tstep);
+      call random_number(rdist)
+      SSn(2)= rdist*Source_factor_n(pp)/sqrt(Tstep);
+
+
+      LL= max(p(pp)-N/3,-N/3);
+      UU= min(N/3,p(pp)+N/3);
+      CC(1)=0.0;
+      CC(2)=0.0;
+
+      do q=LL,UU
+        CC(1)=CC(1)+EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,1)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,2);
+        CC(2)=CC(2)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,1)-EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,2);
+      end do
+
+      kn1(1)=Tstep*(vv(c1,pp,1));
+      kn1(2)=Tstep*(vv(c1,pp,2));
+      kv1(1)=Tstep*((-2.0)*nui(pp)*vv(c1,pp,1)- Cs*k(pp)**2 *nn(c1,pp,1)-k(pp)*k(pp)*epsilon0/4/mi*CC(1));
+      kv1(2)=Tstep*((-2.0)*nui(pp)*vv(c1,pp,2)- Cs*k(pp)**2 *nn(c1,pp,2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2));
+
+      CC(1)=0.0;
+      CC(2)=0.0;
+
+      do q=LL,UU
+        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)+ &
+              (EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
+        CC(2)=CC(2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)- &
+              (EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
+      end do
+
+      kn2(1)=Tstep*(vv(c1,pp,1)+kv1(1)/2+SSn(1)/2*Tstep);
+      kn2(2)=Tstep*(vv(c1,pp,2)+kv1(2)/2+SSn(2)/2*Tstep);
+      kv2(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv1(1)/2+SSn(1)/2*Tstep)- &
+              Cs*k(pp)**2 *(nn(c1,pp,1)+kn1(1)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(1))
+      kv2(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv1(2)/2+SSn(2)/2*Tstep)- &
+              Cs*k(pp)**2 *(nn(c1,pp,2)+kn1(2)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2))
+
+      CC(1)=0.0;
+      CC(2)=0.0;
+
+      do q=LL,UU
+        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) + &
+              (EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
+        CC(2)=CC(2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) - &
+              (EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
+      end do
+
+      kn3(1)=Tstep*(vv(c1,pp,1)+kv2(1)/2+SSn(1)/2*Tstep)
+      kn3(2)=Tstep*(vv(c1,pp,2)+kv2(2)/2+SSn(2)/2*Tstep)
+      kv3(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv2(1)/2+SSn(1)/2*Tstep) - &
+             Cs*k(pp)**2 *(nn(c1,pp,1)+kn2(1)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(1))
+      kv3(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv2(2)/2+SSn(2)/2*Tstep) - &
+             Cs*k(pp)**2 *(nn(c1,pp,2)+kn2(2)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2))
+
+
+      CC(1)=0.0;
+      CC(2)=0.0;
+      do q=LL,UU
+        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) + &
+              (EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
+        CC(2)=CC(2)+(EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) - &
+              (EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
+      end do
+
+      kn4(1)=Tstep*(vv(c1,pp,1)+kv3(1)+SSn(1)*Tstep);
+      kn4(2)=Tstep*(vv(c1,pp,2)+kv3(2)+SSn(2)*Tstep);
+      kv4(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv3(1)+SSn(1)*Tstep) - &
+             Cs*k(pp)**2 *(nn(c1,pp,1)+kn3(1))-k(pp)*k(pp)*epsilon0/4/mi*CC(1));
+      kv4(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv3(2)+SSn(2)*Tstep) - &
+             Cs*k(pp)**2 *(nn(c1,pp,2)+kn3(2))-k(pp)*k(pp)*epsilon0/4/mi*CC(2));
+
+
+      vv(c2,pp,1)=vv(c1,pp,1)+(kv1(1)+2*kv2(1)+2*kv3(1)+kv4(1))/6+SSn(1)*Tstep;
+      vv(c2,pp,2)=vv(c1,pp,2)+(kv1(2)+2*kv2(2)+2*kv3(2)+kv4(2))/6+SSn(2)*Tstep;
+      nn(c2,pp,1)=nn(c1,pp,1)+(kn1(1)+2*kn2(1)+2*kn3(1)+kn4(1))/6;
+      nn(c2,pp,2)=nn(c1,pp,2)+(kn1(2)+2*kn2(2)+2*kn3(2)+kn4(2))/6;
+      nn(c2,N/2,1)=0.0;
+      nn(c2,N/2,2)=0.0;
+
+      if (pp>=1) then
+        nn(c2,N-pp,1)=nn(c2,pp,1);
+        nn(c2,N-pp,2)=-nn(c2,pp,2);
+      end if
+
+    end do ! pp N/2
+
+    if ( mod(tt1,res) == 1) then
       do pp=1,N
-        LL= max(p(pp)-N/3,-N/3);
-        UU= min(N/3,p(pp)+N/3);
-        CC(1)=0.0;
-        CC(2)=0.0;
-
-        do q=LL,UU
-          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,2);
-          CC(2)=CC(2)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,1);
-        end do
-
-
-        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-				!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
-        k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2));
-        k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1));
-
-        EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep;
-        EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep;
-        EE(c2,N/2,1)=0.0
-        EE(c2,N/2,2)=0.0
-
-
+        total_EE(counter1*N*2+pp*2+1)=EE(c2,pp,1);
+        total_EE(counter1*N*2+pp*2+2)=EE(c2,pp,2);
+        total_nn(counter1*N*2+pp*2+1)=nn(c2,pp,1);
+        total_nn(counter1*N*2+pp*2+2)=nn(c2,pp,2);
       end do ! pp N
+      counter1 = counter1 + 1
+    end if
 
+    if (counter1==20000) then
+      write(uEE,*) total_EE
+      write(unn,*) total_nn
+      counter1=0
+    end if
 
-      do pp=1,N/2
-        call random_number(rdist)
-        SSn(1)= rdist*Source_factor_n(pp)/sqrt(Tstep);
-        call random_number(rdist)
-        SSn(2)= rdist*Source_factor_n(pp)/sqrt(Tstep);
-
-
-        LL= max(p(pp)-N/3,-N/3);
-        UU= min(N/3,p(pp)+N/3);
-        CC(1)=0.0;
-        CC(2)=0.0;
-
-        do q=LL,UU
-          CC(1)=CC(1)+EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,1)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,2);
-          CC(2)=CC(2)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,1)-EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,2);
-        end do
-
-        kn1(1)=Tstep*(vv(c1,pp,1));
-        kn1(2)=Tstep*(vv(c1,pp,2));
-        kv1(1)=Tstep*((-2.0)*nui(pp)*vv(c1,pp,1)- Cs*k(pp)**2 *nn(c1,pp,1)-k(pp)*k(pp)*epsilon0/4/mi*CC(1));
-        kv1(2)=Tstep*((-2.0)*nui(pp)*vv(c1,pp,2)- Cs*k(pp)**2 *nn(c1,pp,2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2));
-
-        CC(1)=0.0;
-        CC(2)=0.0;
-
-        do q=LL,UU
-          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)+ &
-                (EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
-          CC(2)=CC(2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)- &
-                (EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
-        end do
-
-        kn2(1)=Tstep*(vv(c1,pp,1)+kv1(1)/2+SSn(1)/2*Tstep);
-        kn2(2)=Tstep*(vv(c1,pp,2)+kv1(2)/2+SSn(2)/2*Tstep);
-        kv2(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv1(1)/2+SSn(1)/2*Tstep)- &
-                Cs*k(pp)**2 *(nn(c1,pp,1)+kn1(1)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(1))
-        kv2(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv1(2)/2+SSn(2)/2*Tstep)- &
-                Cs*k(pp)**2 *(nn(c1,pp,2)+kn1(2)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2))
-
-        CC(1)=0.0;
-        CC(2)=0.0;
-
-        do q=LL,UU
-          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) + &
-                (EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
-          CC(2)=CC(2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) - &
-                (EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
-        end do
-
-        kn3(1)=Tstep*(vv(c1,pp,1)+kv2(1)/2+SSn(1)/2*Tstep)
-        kn3(2)=Tstep*(vv(c1,pp,2)+kv2(2)/2+SSn(2)/2*Tstep)
-        kv3(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv2(1)/2+SSn(1)/2*Tstep) - &
-               Cs*k(pp)**2 *(nn(c1,pp,1)+kn2(1)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(1))
-        kv3(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv2(2)/2+SSn(2)/2*Tstep) - &
-               Cs*k(pp)**2 *(nn(c1,pp,2)+kn2(2)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2))
-
-
-        CC(1)=0.0;
-        CC(2)=0.0;
-        do q=LL,UU
-          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) + &
-                (EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
-          CC(2)=CC(2)+(EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) - &
-                (EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
-        end do
-
-        kn4(1)=Tstep*(vv(c1,pp,1)+kv3(1)+SSn(1)*Tstep);
-        kn4(2)=Tstep*(vv(c1,pp,2)+kv3(2)+SSn(2)*Tstep);
-        kv4(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv3(1)+SSn(1)*Tstep) - &
-               Cs*k(pp)**2 *(nn(c1,pp,1)+kn3(1))-k(pp)*k(pp)*epsilon0/4/mi*CC(1));
-        kv4(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv3(2)+SSn(2)*Tstep) - &
-               Cs*k(pp)**2 *(nn(c1,pp,2)+kn3(2))-k(pp)*k(pp)*epsilon0/4/mi*CC(2));
-
-
-        vv(c2,pp,1)=vv(c1,pp,1)+(kv1(1)+2*kv2(1)+2*kv3(1)+kv4(1))/6+SSn(1)*Tstep;
-        vv(c2,pp,2)=vv(c1,pp,2)+(kv1(2)+2*kv2(2)+2*kv3(2)+kv4(2))/6+SSn(2)*Tstep;
-        nn(c2,pp,1)=nn(c1,pp,1)+(kn1(1)+2*kn2(1)+2*kn3(1)+kn4(1))/6;
-        nn(c2,pp,2)=nn(c1,pp,2)+(kn1(2)+2*kn2(2)+2*kn3(2)+kn4(2))/6;
-        nn(c2,N/2,1)=0.0;
-        nn(c2,N/2,2)=0.0;
-
-        if (pp>=1) then
-          nn(c2,N-pp,1)=nn(c2,pp,1);
-          nn(c2,N-pp,2)=-nn(c2,pp,2);
-        end if
-
-      end do ! pp N/2
-
-      if ( mod(tt1,res) == 1) then
-        do pp=1,N
-          total_EE(counter1*N*2+pp*2+1)=EE(c2,pp,1);
-          total_EE(counter1*N*2+pp*2+2)=EE(c2,pp,2);
-          total_nn(counter1*N*2+pp*2+1)=nn(c2,pp,1);
-          total_nn(counter1*N*2+pp*2+2)=nn(c2,pp,2);
-        end do ! pp N
-        counter1 = counter1 + 1
-      end if
-
-      if (counter1==20000) then
-        write(uEE,*) total_EE
-        write(unn,*) total_nn
-        counter1=0
-      end if
-
-    end do ! tt1
+  end do ! tt1
 
   if (counter1>0) then
     write(uEE,*) total_EE

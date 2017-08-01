@@ -54,7 +54,7 @@ integer, parameter :: QW=1     ! number of realizations
 
 integer, allocatable :: SEED(:)
 integer :: Nseed, clock
-real(wp) :: rdist
+real(wp) :: rdist(N)
 
 
 real(wp), parameter :: eta=(Te+3.0_wp*Ti) / Te
@@ -68,7 +68,7 @@ integer :: Nnbeam
 
 character(:), allocatable :: odir, ofn
 character(256) :: argv
-integer :: argc,i, ii,iij1,iij2,counter1, q,tt1,c1,c2,beami, beamj, realization,u,uEE,uNN
+integer :: argc,i, ii,iij1,counter1, q,tt1,c1,c2,beami, beamj, realization,u,uEE,uNN
 real(wp) :: tic,toc
 
 !---- main loop variables
@@ -271,29 +271,27 @@ do realization=1,QW
 
 vv(:,:,:)=0.0_wp
 
-  do iij1=1,4
-    do iij2=1,N
-      call random_number(rdist)
-      EE (iij1,iij2,1)=sqrt(output1(iij2,5)/2.0)*rdist
-      call random_number(rdist)
-      EE (iij1,iij2,2)=sqrt(output1(iij2,5)/2.0)*rdist
-      call random_number(rdist)
-      nn (iij1,iij2,1)=sqrt(output1(iij2,6)/2.0)*rdist
-      call random_number(rdist)
-      nn (iij1,iij2,2)=sqrt(output1(iij2,6)/2.0)*rdist
-    enddo ! iij2 N
+  do iij1=1,3
+    call random_number(rdist)
+    EE (iij1,:,1)=sqrt(output1(:,5)/2.0)*rdist
+    call random_number(rdist)
+    EE (iij1,:,2)=sqrt(output1(:,5)/2.0)*rdist
+    call random_number(rdist)
+    nn (iij1,:,1)=sqrt(output1(:,6)/2.0)*rdist
+    call random_number(rdist)
+    nn (iij1,:,2)=sqrt(output1(:,6)/2.0)*rdist
   end do ! iij1 4
 
-  nn(:,N-N/2+1:N,1) = nn(:,1:N/2,1)
-  nn(:,N-N/2+1:N,2) = -nn(:,1:N/2,2) ! yes minus
+  nn(:,N-N/2+1:N,1) = nn(:,:N/2,1)
+  nn(:,N-N/2+1:N,2) = -nn(:,:N/2,2) ! yes minus
   nn(:,N/2,:)=0.0_wp
 
   counter1=0
   do tt1=1,TT
 
 !		int c0=(tt1-1) % 3;
-    c1= mod(tt1, 3)
-    c2= mod(tt1+1, 3)
+    c1= mod(tt1, 3)+1
+    c2= mod(tt1+1, 3)+1
 !		long double omega_off=omegae+2*pi*300000;
 
 		! update display every 50th iteration
@@ -312,10 +310,8 @@ vv(:,:,:)=0.0_wp
         CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1);
       end do
 
-      call random_number(rdist)
-      SSE(pp,1) = rdist*Source_factor_E(pp)/sqrt(Tstep)
-      call random_number(rdist)
-      SSE(pp,2)= rdist*Source_factor_E(pp)/sqrt(Tstep)
+      call random_number(rdist(:2))
+      SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
 
       cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
 			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
@@ -383,21 +379,17 @@ vv(:,:,:)=0.0_wp
       k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2));
       k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1));
 
-      EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep;
-      EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep;
-      EE(c2,N/2,1)=0.0
-      EE(c2,N/2,2)=0.0
+      EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep
+      EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep
+      EE(c2,N/2,:)=0.0_wp
 
 
     end do ! pp N
 
 
     do pp=1,N/2
-      call random_number(rdist)
-      SSn(1)= rdist*Source_factor_n(pp)/sqrt(Tstep);
-      call random_number(rdist)
-      SSn(2)= rdist*Source_factor_n(pp)/sqrt(Tstep);
-
+      call random_number(rdist(:2))
+      SSn(:)= rdist(:2)*Source_factor_n(pp)/sqrt(Tstep);
 
       LL= max(p(pp)-N/3,-N/3);
       UU= min(N/3,p(pp)+N/3);
@@ -482,10 +474,9 @@ vv(:,:,:)=0.0_wp
 
     if ( mod(tt1,res) == 1) then
       do pp=1,N
-        total_EE(counter1*N*2+pp*2+1)=EE(c2,pp,1);
-        total_EE(counter1*N*2+pp*2+2)=EE(c2,pp,2);
-        total_nn(counter1*N*2+pp*2+1)=nn(c2,pp,1);
-        total_nn(counter1*N*2+pp*2+2)=nn(c2,pp,2);
+        ! FIXME: reshape, transpose  to vectorize ?
+        total_EE(counter1*N*2+pp*2+1:counter1*N*2+pp*2+2)=EE(c2,pp,:)
+        total_nn(counter1*N*2+pp*2+1:counter1*N*2+pp*2+2)=nn(c2,pp,:)
       end do ! pp N
       counter1 = counter1 + 1
     end if

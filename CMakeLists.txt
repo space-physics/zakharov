@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8.12)
-project(zahkarov CXX)
+project(zahkarov CXX Fortran)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,3 +14,4 @@ include_directories(${Boost_INCLUDE_DIR})
 add_executable(zakh zakh.cpp)
 target_link_libraries(zakh -lboost_system -lboost_filesystem -lboost_program_options)
 
+add_executable(zakhfort zakh.f90)

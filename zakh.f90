@@ -18,8 +18,7 @@ real(wp), parameter :: mi=16*1.66e-27_wp ! atomic oxygen
 real(wp), parameter :: Kb=1.38064852e-23_wp    ! Boltzmann cte
 real(wp), parameter :: eV=1.602176565e-19_wp, epsilon0=8.854187817e-12_wp
 
-integer, parameter :: Z=1
-real(wp), parameter :: Te=3000.0_wp, Ti=1000.0_wp
+real(wp), parameter :: Te=3000.0_wp, Ti=1000.0_wp, Z=1.0_wp
 real(wp), parameter :: nuic=1.0_wp ! ion collision freq
 real(wp), parameter :: nuec=100.0_wp ! electron collision freq
 real(wp), parameter :: n0=5.0e11_wp ! background density
@@ -72,7 +71,7 @@ real(wp) :: tic,toc
 !---- main loop variables
 
 integer :: p(N)
-real(wp) :: k(N), Xsection_ion=0.0_wp, Xsection_pl=0.0_wp, E_thermal_k_squared, n_thermal_k_squared, Source_factor_E(N), &
+real(wp) :: k(N), Xsection_ion, Xsection_pl, E_thermal_k_squared, n_thermal_k_squared, Source_factor_E(N), &
   Source_factor_n(N), omegaL(N), gamas, nui(N), gamal1, gamal2, gamal3, gamal, nue(N), output1(N,12)
 
 type params
@@ -185,14 +184,15 @@ do beamj=1,Nvbeam
     else
       k(ii)=2*pi*p(ii)/N/Xstep
       call Xsection(Xsection_ion,Xsection_pl,k(ii))
-      Xsection_ion=Xsection_ion/N/N
-      Xsection_pl=Xsection_pl/N/N
+      Xsection_ion=Xsection_ion/N**2
+      Xsection_pl=Xsection_pl/N**2
       n_thermal_k_squared=Xsection_ion*n0
-      E_thermal_k_squared=Xsection_pl *n0* electroncharge/epsilon0/k(ii)**2.0_wp
+      E_thermal_k_squared=Xsection_pl *n0* (electroncharge/epsilon0/k(ii))**2.0_wp
+
     end if
 
-    omegaL(ii)=sqrt(omegae**2.0_wp+3*k(ii)*ve**2.0_wp)
-    gamas= -1.0_wp*sqrt(pi/8)*(sqrt(me/mi)+ Te/Ti**2.0_wp/sqrt(Te/Ti)*exp(-1.0_wp*(Te/2.0/Ti)-1.5))*abs(k(ii))*Cs
+    omegaL(ii)=sqrt(omegae**2.0_wp + 3*(k(ii)*ve)**2.0_wp)
+    gamas= -1.0_wp*sqrt(pi/8)*(sqrt(me/mi) + (Te/Ti)**2.0_wp/sqrt(Te/Ti)*exp(-1.0_wp*(Te/2.0/Ti)-1.5))*abs(k(ii))*Cs
 		!gamas= -1.0_wp*sqrt(pi/2)*(sqrt(me/mi)+4*pow(Te/2/Ti,2)/sqrt(Te/2/Ti)*exp(-1.0_wp*(Te*4/Ti)))*abs(k(ii))*Cs*10   //based on Robinson 2002
 		!gamas= -1.0_wp*sqrt(pi/8)*pow(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te,2)/sqrt(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp(-1.0_wp*(Te/2.0/Ti)/(1+k(ii)*k(ii)*lambdaD*lambdaD)-1.5))*abs(k(ii))*Cs   //Based on some Chinese paper!!
     nui(ii)=(nuic/2-gamas)
@@ -204,15 +204,15 @@ do beamj=1,Nvbeam
       Source_factor_n(ii)=0.0_wp
       Source_factor_E(ii)=0.0_wp
     else
-      gamal1=-1.0_wp*sqrt(pi/8)* omegae/k(ii)/ve**2.0_wp * sign(1.0_wp,k(ii)) * omegaL(ii)**2.0_wp / &
-              (k(ii)*ve)*exp(-1.0_wp*omegaL(ii)/k(ii)/ve**2.0_wp/2)  !Landau damping due to the thermal electrons
+      gamal1=-1.0_wp*sqrt(pi/8) * (omegae/k(ii)/ve)**2.0_wp * sign(1.0_wp,k(ii)) * omegaL(ii)**2.0_wp / &
+              (k(ii)*ve) * exp(-1.0_wp*(omegaL(ii)/k(ii)/ve)**2.0_wp/2)  !Landau damping due to the thermal electrons
 
-      gamal2=-1.0_wp*sqrt(pi/8)* omegae / k(ii) / tetabeam(beamj)**2.0_wp * sign(1.0_wp,k(ii)) * nbeam(beami) / &
+      gamal2=-1.0_wp*sqrt(pi/8)* (omegae / k(ii) / tetabeam(beamj))**2.0_wp * sign(1.0_wp,k(ii)) * nbeam(beami) / &
               n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam(beamj)) / (k(ii)*tetabeam(beamj)) * &
-              exp(-1.0_wp* omegaL(ii)-k(ii)*vbeam(beamj) / k(ii) / tetabeam(beamj)**2.0_wp/2) !Landau damping due to the beam
+              exp(-1.0_wp* (omegaL(ii)-k(ii)*vbeam(beamj) / k(ii) / tetabeam(beamj))**2.0_wp/2) !Landau damping due to the beam
 !gamal2=-1.0_wp*sqrt(pi/8)*pow(omegae/k(ii)/tetabeam.at(beamj),2)* sign(1,k(ii)) *nbeam.at(beami)/n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam.at(beamj))/(k(ii)*tetabeam.at(beamj))*exp(-1.0_wp*pow((omegaL(ii)-k(ii)*vbeam.at(beamj))/k(ii)/tetabeam.at(beamj),2)/2)  //Landau damping due to the beam
-      gamal3=-1.0_wp*sqrt(pi)*omegae*omegaL(ii)**2.0_wp / k(ii)**3.0_wp * sign(1.0_wp,k(ii)) *se_cte * &
-              (1+ omegaL(ii)**2.0_wp/kappa/ k(ii)*theta_se**2.0_wp)**(-1.0_wp*(kappa+1))
+      gamal3=-1.0_wp*sqrt(pi)* (omegae*omegaL(ii))**2.0_wp / k(ii)**3.0_wp * sign(1.0_wp,k(ii)) *se_cte * &
+              (1+ omegaL(ii)**2.0_wp/kappa/ (k(ii)*theta_se)**2.0_wp)**(-1.0_wp*(kappa+1))
 
       gamal=gamal1*(1-se_percent)+gamal2+se_percent*gamal3 ! here decide to include the beam and Kappa distribution
       nue(ii) = nuec/2-gamal1
@@ -238,6 +238,9 @@ do beamj=1,Nvbeam
     output1(ii,11) = Source_factor_E(ii)
     output1(ii,12) = Source_factor_n(ii)
   end do ! ii
+
+  !print *,output1(1,:)
+
 
   write(argv,'(A,I0.3,A,I0.3,A)') odir//"/output1_n",beami,"_v", beamj,'.bin'
   open(newunit=u,file=trim(argv),status='new',action='write',access='stream')
@@ -276,6 +279,9 @@ do beamj=1,Nvbeam
       call random_number(rdist)
       nn (iij1,:,2)=sqrt(output1(:,6)/2.0)*rdist
     end do ! iij1 4
+
+  !  print *,EE(3,3,2)
+  !  stop
 
     nn(:,N-N/2+1:N,1) = nn(:,:N/2,1)
     nn(:,N-N/2+1:N,2) = -nn(:,:N/2,2) ! yes minus
@@ -392,7 +398,7 @@ do beamj=1,Nvbeam
         end do
 
         kn1(:)=Tstep*(vv(c1,pp,:))
-        kv1(:)=Tstep*(-2.0_wp*nui(pp)*vv(c1,pp,:) - Cs*k(pp)**2.0_wp *nn(c1,pp,:)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
+        kv1(:)=Tstep*(-2.0_wp*nui(pp)*vv(c1,pp,:) - (Cs*k(pp))**2.0_wp *nn(c1,pp,:)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
 
         CC(:)=0.0_wp
 
@@ -407,7 +413,7 @@ do beamj=1,Nvbeam
         kn2(:)=Tstep*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)
 
         kv2(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)- &
-                Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn1(:)/2)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
+                (Cs*k(pp))**2.0_wp *(nn(c1,pp,:)+kn1(:)/2)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
 
         CC(:)=0.0_wp
 
@@ -421,7 +427,7 @@ do beamj=1,Nvbeam
         kn3(:)=Tstep*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep)
 
         kv3(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep) - &
-               Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn2(:)/2)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
+               (Cs*k(pp))**2.0_wp *(nn(c1,pp,:)+kn2(:)/2)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
 
 
 
@@ -435,7 +441,7 @@ do beamj=1,Nvbeam
 
         kn4(:)=Tstep*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep)
         kv4(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep) - &
-               Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn3(:))-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
+               (Cs*k(pp))**2.0_wp *(nn(c1,pp,:)+kn3(:))-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
 
 
         vv(c2,pp,:)=vv(c1,pp,:)+(kv1(:)+2*kv2(:)+2*kv3(:)+kv4(:))/6+SSn(:)*Tstep
@@ -451,6 +457,7 @@ do beamj=1,Nvbeam
 
   ! WRITE TO FILE
       if ( mod(tt1,res) == 0) then
+      !  print *, 'updating output EE nn files'
         write(uEE) EE(c2,:,:)
         write(unn) nn(c2,:,:)
       end if
@@ -473,6 +480,7 @@ contains
 
 
 pure elemental subroutine Xsection(Xsec_ion, Xsec_pl, k)
+  implicit none
 
   real(wp), intent(out) :: Xsec_ion, Xsec_pl
   real(wp), intent(in) :: k
@@ -480,9 +488,8 @@ pure elemental subroutine Xsection(Xsec_ion, Xsec_pl, k)
   real(wp) :: alpha,XX
 
   alpha=1.0_wp / (k*lambdaD)
-  Xsec_ion= 2.0_wp * pi/(1.0_wp + alpha**2.0_wp)*(Z* alpha**4.0_wp/(1.0_wp+alpha**2.0_wp + alpha**2.0_wp * (Z*Te/Ti) ))
-
-  XX=2.0_wp*pi*(1.0_wp + alpha**2.0_wp*Z*Te/Ti)/(1.0_wp+alpha**2.0_wp+alpha**2.0_wp*(Z*Te/Ti))
+  Xsec_ion= 2.0_wp * pi/(1.0_wp + alpha**2.0_wp) * (Z * alpha**4.0_wp/(1.0_wp+alpha**2.0_wp + alpha**2.0_wp * Z*Te/Ti))
+  XX=2.0_wp*pi*(1.0_wp + alpha**2.0_wp*Z*Te/Ti)/(1.0_wp+alpha**2.0_wp+alpha**2.0_wp*Z*Te/Ti)
 
   Xsec_pl=XX-Te/Ti*Xsec_ion
 

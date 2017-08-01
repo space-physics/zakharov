@@ -1,5 +1,6 @@
 function [nnComplex,EEComplex] = Langmuir_read_data(fnNN,fnEE,useSinglePrec)
 %% nn
+assert(exist(fnNN,'file')==2,[fnNN,' not found'])
 display(['reading file ',fnNN])
 fid=fopen(fnNN);
     if useSinglePrec
@@ -10,6 +11,7 @@ fid=fopen(fnNN);
     
     fclose(fid);
 %% EE    
+assert(exist(fnEE,'file')==2,[fnEE,' not found'])
 display(['reading file ',fnEE])
     fid2=fopen(fnEE);
     if useSinglePrec

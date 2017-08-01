@@ -34,15 +34,13 @@ real(wp), parameter :: power_E_cte=0.5033_wp*0.5033_wp/sqrt(3.0_wp)
 
 !    Kappa parameters
 ! look at Broughton et al., Modeling of MF wave mode conversion
-real(wp), parameter :: se_percent=0.001_wp
-real(wp), parameter :: kappa=1.584_wp
-real(wp), parameter :: T_se=18.2_wp*eV
+real(wp), parameter :: se_percent=0.001_wp, kappa=1.584_wp, T_se=18.2_wp*eV
 real(wp), parameter :: theta_se=sqrt((kappa-1.5_wp)/kappa*2.0_wp*T_se/me)
 real(wp), parameter :: se_cte= 0.7397_wp / theta_se**3.0_wp
 
 !    Simulation parameters
 
-real(wp), parameter :: endTime=100e-7_wp !100.0e-3_wp ! simulation ends (seconds)
+real(wp), parameter :: endTime=100e-6_wp !100.0e-3_wp ! simulation ends (seconds)
 real(wp), parameter :: Tstep=0.5e-7_wp ! simulation time steps
 integer, parameter :: TT= floor(endTime / Tstep)              ! floor(endTime/Tstep)+2
 integer, parameter :: res=20
@@ -79,11 +77,9 @@ real(wp) :: k(N), Xsection_ion=0.0_wp, Xsection_pl=0.0_wp, E_thermal_k_squared, 
 
 type params
 
-  real(wp) :: pi, me,electroncharge,mi, Kb,eV,epsilon0, Te, Ti, nuic, nuec, n0, nbeam, &
+  real(wp) :: pi, me,electroncharge,mi, Kb,eV,epsilon0, Z,Te, Ti, nuic, nuec, n0, nbeam, &
             vbeam_ev, vbeam, tetabeam, endTime, Tstep, TT, res, TT_res, L, N, Xstep, QW, &
             eta, ve, Cs, omegae, lambdaD
-
-  integer :: Z
 !  	//have to include other parameters regarding the Kappa distribution
 
 end type params
@@ -95,7 +91,6 @@ real(wp):: EE(3,N,2), nn(3,N,2), vv(3,N,2), CC(2), SSE(N,2), SSn(2), cte1, cte2,
     k1(N,2), k2(N,2), k3(N,2), k4(N,2), kn1(2), kn2(2), kn3(2), kn4(2), kv1(2), kv2(2), kv3(2), kv4(2)
 
 integer :: LL,UU,pp
-
 
 !----
 
@@ -133,6 +128,7 @@ print *,"tetabeam=",tetabeam
 
 call random_seed(size=nseed)
 allocate(seed(nseed))
+seed(:) = 600  ! FIXME: arbitrary for simulation repeatability
 
 do beami=1,Nnbeam
 do beamj=1,Nvbeam
@@ -141,10 +137,10 @@ do beamj=1,Nvbeam
   parameters%me = me
   parameters%electroncharge = electroncharge
   parameters%mi = mi
-  parameters%Z = Z
   parameters%Kb = Kb
   parameters%eV = eV
   parameters%epsilon0= epsilon0
+  parameters%Z = Z
   parameters%Te = Te
   parameters%Ti = Ti
   parameters%nuic = nuic
@@ -169,11 +165,11 @@ do beamj=1,Nvbeam
   parameters%omegae = omegae
   parameters%lambdaD = lambdaD
 
-  write(argv,'(A,I0.3,A,I0.3)')  odir//"/parameters_n" , beami, "_v" , beamj
+  write(argv,'(A,I0.3,A,I0.3,A)')  odir//"/parameters_n" , beami, "_v" , beamj,'.bin'
   ofn = trim(argv)
 
   open(newunit=u, file=ofn, status='new',action='write', access='stream')
-  write(u) parameters, SEED
+  write(u) parameters, real(SEED,wp)
   close(u)
   print *, "Wrote parameters to ",ofn
 
@@ -243,7 +239,7 @@ do beamj=1,Nvbeam
     output1(ii,12) = Source_factor_n(ii)
   end do ! ii
 
-  write(argv,'(A,I0.3,A,I0.3)') odir//"/output1_n",beami,"_v", beamj
+  write(argv,'(A,I0.3,A,I0.3,A)') odir//"/output1_n",beami,"_v", beamj,'.bin'
   open(newunit=u,file=trim(argv),status='new',action='write',access='stream')
 
   write(u) output1
@@ -255,14 +251,14 @@ do beamj=1,Nvbeam
     cte2=omegae/2.0_wp/n0/1
 
     call system_clock(clock)
-    seed = clock + 37 * [ (i - 1, i = 1, nseed) ]
+!    seed = clock + 37 * [ (i - 1, i = 1, nseed) ]
     call random_seed(put=seed)
 
-    write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/EE",realization,"_n",beami,"_v",beamj
+    write(argv,'(A,I0.3,I0.3,A,I0.3,A,I0.3,A)') odir//"/EE",seed(1),realization,"_n",beami,"_v",beamj,".bin"
     open(newunit=uEE,file=trim(argv), status='new',action='write',access='stream')
     print *,'writing to ',trim(argv)
 
-    write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/nn",realization, "_n" ,beami, "_v",beamj
+    write(argv,'(A,I0.3,I0.3,A,I0.3,A,I0.3,A)') odir//"/nn",seed(1),realization, "_n" ,beami, "_v",beamj,'.bin'
     open(newunit=uNN,file=trim(argv), status='new',action='write',access='stream')
     print *,'writing to ',trim(argv)
 

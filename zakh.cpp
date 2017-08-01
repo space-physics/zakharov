@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <random>
 #include <ctime>
+#include <chrono>
 #include <fstream>
 #include <cmath>
 
@@ -50,7 +51,7 @@ double se_cte= 0.7397/pow(theta_se,3);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////    Simulation parameters
 
-const double endTime=100.0e-3;    // simulation ends (seconds)
+const double endTime=100.0e-6;    // simulation ends (seconds)
 const double Tstep=0.5e-7;     // simulation time steps
 double TT=endTime/Tstep;              //floor(endTime/Tstep)+2;
 const int res=20;
@@ -145,11 +146,8 @@ int main(int argc, char ** argv)
 	printf("Nvbeam=%i \n",Nvbeam);
 	printf("TT=%0.1f time steps \n",TT);
 
-	time_t now;
-	struct tm *current;
-	now = time(0);
-	current = localtime(&now);
-	int StartTime[3]={current->tm_hour, current->tm_min, current->tm_sec};
+std::chrono::time_point<std::chrono::system_clock> tic,toc;
+tic = std::chrono::system_clock::now();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////   initialization
 
@@ -214,21 +212,21 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	parameters[23]=N;
 	parameters[24]=Xstep;
 	parameters[25]=QW;
-	parameters[26]=SEED;
-	parameters[27]=eta;
-	parameters[28]=ve;
-	parameters[29]=Cs;
-	parameters[30]=omegae;
-	parameters[31]=lambdaD;
+	parameters[26]=eta;
+	parameters[27]=ve;
+	parameters[28]=Cs;
+	parameters[29]=omegae;
+	parameters[30]=lambdaD;
+  parameters[31]=SEED;
 	//have to include other parameters regarding the Kappa distribution
 
-	std::string fn = outDir + "parameters_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
-	const char* fnp = fn.c_str();
+  char fnp[256];
+	std::sprintf(fnp, "%sparameters_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
 	FILE* parameters_out;
 	parameters_out = fopen(fnp, "wb");
 	int bout=fwrite(parameters, 1, sizeof(parameters), parameters_out);
 	fclose(parameters_out);
-	std::cout << "Wrote " << bout << " bytes to " << fn << std::endl;
+	std::cout << "Wrote " << bout << " bytes to " << fnp << std::endl;
 
 	for (int ii=0;ii<N;ii++){
 		p[ii]=ii-N/2;
@@ -285,13 +283,14 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 		output1[ii][11]=Source_factor_n[ii];
 	}
 
-	fn = outDir + "output1_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
-	const char* fno = fn.c_str();
+  char fno[256];
+	std::sprintf(fno,"%soutput1_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
+
 	FILE* output1_out;
 	output1_out = fopen(fno, "wb");
 	bout = fwrite(output1, 1, sizeof(output1), output1_out);
 	fclose(output1_out);
-	std::cout << "Wrote " << bout << " bytes to " << fn << std::endl;
+	std::cout << "Wrote " << bout << " bytes to " << fno << std::endl;
 
 
 	static double EE [3][N][2];
@@ -305,8 +304,9 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	double cte2=omegae/2.0/n0/1;
 	double k1[N][2],k2[N][2],k3[N][2],k4[N][2];
 	double kn1[2], kn2[2], kn3[2], kn4[2], kv1[2], kv2[2], kv3[2], kv4[2];
-	static double total_EE[20000*N*2];
-	static double total_nn[20000*N*2];
+  const int Nwb = 200; //arbitrary
+	static double total_EE[Nwb*N*2+N*2+2];
+	static double total_nn[Nwb*N*2+N*2+2];
 
 
 for (int realization=0;realization<QW;realization++){
@@ -316,13 +316,13 @@ for (int realization=0;realization<QW;realization++){
 	std::default_random_engine generator (aabb);
 	std::normal_distribution<long double> distribution (0.0,1.0);
 
-	fn = outDir + "EE" + std::to_string(SEED+realization) + "_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
-    const char* nameE = fn.c_str();
+  char nameE[256];
+	std::sprintf(nameE,"%sEE%03d%03d_n%03d_v%03d.bin",outDir.c_str(),SEED,realization+1,beami+1,beamj+1);
 	FILE* EE_out;
 	EE_out = fopen(nameE, "wb");
 
-	fn = outDir + "nn" + std::to_string(SEED+realization) + "_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
-    const char* namen = fn.c_str();
+  char namen[256];
+	std::sprintf(namen,"%snn%03d%03d_n%03d_v%03d.bin",outDir.c_str(),SEED,realization+1,beami+1,beamj+1);
 	FILE* nn_out;
 	nn_out = fopen(namen, "wb");
 
@@ -540,7 +540,7 @@ for (int realization=0;realization<QW;realization++){
 				counter1++;
 			}
 
-			if (counter1==20000){
+			if (counter1==Nwb){
 				fwrite(total_EE, 1, sizeof(total_EE), EE_out);
 				fwrite(total_nn, 1, sizeof(total_nn), nn_out);
 				counter1=0;
@@ -561,11 +561,13 @@ for (int realization=0;realization<QW;realization++){
 }//Nnbeam
 
 
-	now = time(0);
-	current = localtime(&now);
-	int EndTime[3]={current->tm_hour, current->tm_min, current->tm_sec};
-	printf("Elapsed Time: %i:%i:%i\n", EndTime[0]-StartTime[0], EndTime[1]-StartTime[1], EndTime[2]-StartTime[2]);
+  toc = std::chrono::system_clock::now();
 
+  std::chrono::duration<double> elapsed_seconds = toc-tic;
+  std::time_t stoptime = std::chrono::system_clock::to_time_t(toc);
+
+  std::cout << "finished computation at " << std::ctime(&stoptime)
+            << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
 	return EXIT_SUCCESS;
 }

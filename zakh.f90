@@ -306,7 +306,7 @@ do beamj=1,Nvbeam
         call random_number(rdist(:2))
         SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
 
-        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+        cte1=1.5*omegae*(lambdaD*k(pp))**2.0_wp
   			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
         k1(pp,2)=Tstep*(-1.0_wp*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
@@ -323,7 +323,7 @@ do beamj=1,Nvbeam
           CC(2)=CC(2)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1)
         end do
 
-        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+        cte1=1.5*omegae*(lambdaD*k(pp))**2.0_wp
   			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k2(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
                   nuE(pp) * (EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
@@ -343,7 +343,7 @@ do beamj=1,Nvbeam
           CC(2)=CC(2)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1)
         end do
 
-        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+        cte1=1.5*omegae*(lambdaD*k(pp))**2.0_wp
   			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k3(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
                 nuE(pp)*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
@@ -365,7 +365,7 @@ do beamj=1,Nvbeam
         end do
 
 
-        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+        cte1=1.5*omegae*(lambdaD*k(pp))**2.0_wp
   			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2))
         k4(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep) - &
@@ -392,7 +392,7 @@ do beamj=1,Nvbeam
         end do
 
         kn1(:)=Tstep*(vv(c1,pp,:))
-        kv1(:)=Tstep*(-2.0_wp*nui(pp)*vv(c1,pp,:) - Cs*k(pp)**2.0_wp *nn(c1,pp,:)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+        kv1(:)=Tstep*(-2.0_wp*nui(pp)*vv(c1,pp,:) - Cs*k(pp)**2.0_wp *nn(c1,pp,:)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
 
         CC(:)=0.0_wp
 
@@ -407,7 +407,7 @@ do beamj=1,Nvbeam
         kn2(:)=Tstep*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)
 
         kv2(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)- &
-                Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn1(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+                Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn1(:)/2)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
 
         CC(:)=0.0_wp
 
@@ -421,7 +421,7 @@ do beamj=1,Nvbeam
         kn3(:)=Tstep*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep)
 
         kv3(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep) - &
-               Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn2(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+               Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn2(:)/2)-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
 
 
 
@@ -435,7 +435,7 @@ do beamj=1,Nvbeam
 
         kn4(:)=Tstep*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep)
         kv4(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep) - &
-               Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn3(:))-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+               Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn3(:))-k(pp)**2.0_wp*epsilon0/4/mi*CC(:))
 
 
         vv(c2,pp,:)=vv(c1,pp,:)+(kv1(:)+2*kv2(:)+2*kv3(:)+kv4(:))/6+SSn(:)*Tstep

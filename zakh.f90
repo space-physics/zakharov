@@ -173,11 +173,10 @@ do beamj=1,Nvbeam
   write(argv,'(A,I0.3,A,I0.3)')  odir//"/parameters_n" , beami, "_v" , beamj
   ofn = trim(argv)
 
-  open(newunit=u, file=ofn, form='formatted',status='unknown',action='write')
-  write(u,*) parameters
-  write(u,*) SEED
+  open(newunit=u, file=ofn, status='new',action='write', access='stream')
+  write(u) parameters, SEED
   close(u)
-  print *, "Wrote",parameters,SEED,"to",ofn
+  print *, "Wrote parameters to ",ofn
 
   do ii=1,N
     p(ii)=ii-N/2
@@ -246,12 +245,11 @@ do beamj=1,Nvbeam
   end do ! ii
 
   write(argv,'(A,I0.3,A,I0.3)') odir//"/output1_n",beami,"_v", beamj
-  open(newunit=u,file=trim(argv),status='unknown',action='write')
+  open(newunit=u,file=trim(argv),status='new',action='write',access='stream')
 
-  write(u,*) output1
-
+  write(u) output1
   close(u)
-  print *, "Wrote to", trim(argv)
+  print *, "Wrote to ", trim(argv)
 
 
 do realization=1,QW
@@ -262,12 +260,12 @@ do realization=1,QW
   call random_seed(put=seed)
 
   write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/EE",realization,"_n",beami,"_v",beamj
-  open(newunit=uEE,file=trim(argv), status='unknown',action='write')
-  print *,'writing to',trim(argv)
+  open(newunit=uEE,file=trim(argv), status='new',action='write',access='stream')
+  print *,'writing to ',trim(argv)
 
   write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/nn",realization, "_n" ,beami, "_v",beamj
-  open(newunit=uNN,file=trim(argv), status='unknown',action='write')
-  print *,'writing to',trim(argv)
+  open(newunit=uNN,file=trim(argv), status='new',action='write',access='stream')
+  print *,'writing to ',trim(argv)
 
 !   main loops
 
@@ -287,10 +285,7 @@ do realization=1,QW
 
     enddo ! iij2 N
 
-    do iij2=1,N/2
-      nn (iij1,N-iij2,1)=  nn(iij1,iij2,1)
-      nn (iij1,N-iij2,2)= -nn(iij1,iij2,2)
-    enddo ! iij2 N/2
+    nn(iij1,N-1:N/2,1) = nn(iij1,N-1:N/2,1)
 
     nn (iij1,N/2,1)=0
     nn (iij1,N/2,2)=0
@@ -306,8 +301,8 @@ do realization=1,QW
 !		long double omega_off=omegae+2*pi*300000;
 
 		! update display every 50th iteration
-    if (mod(tt1,50) == 0) print '(A,I0.3,F5.2,A,I0.3,A,I0.3)',"Realization: ",&
-        realization,tt1*100.0/TT,"% complete.  n",beami," v",beamj
+    if (mod(tt1,50) == 0) print '(A,I0.3,A,I0.5,F5.2,A,I0.3,A,I0.3)',"Realization: ",&
+        realization," counter1 ",counter1,tt1*100.0/TT,"% complete.  n",beami," v",beamj
 
     do pp=1,N
 
@@ -479,8 +474,8 @@ do realization=1,QW
       vv(c2,pp,2)=vv(c1,pp,2)+(kv1(2)+2*kv2(2)+2*kv3(2)+kv4(2))/6+SSn(2)*Tstep;
       nn(c2,pp,1)=nn(c1,pp,1)+(kn1(1)+2*kn2(1)+2*kn3(1)+kn4(1))/6;
       nn(c2,pp,2)=nn(c1,pp,2)+(kn1(2)+2*kn2(2)+2*kn3(2)+kn4(2))/6;
-      nn(c2,N/2,1)=0.0;
-      nn(c2,N/2,2)=0.0;
+      nn(c2,N/2,1)=0.0_wp
+      nn(c2,N/2,2)=0.0_wp
 
       if (pp>=1) then
         nn(c2,N-pp,1)=nn(c2,pp,1);
@@ -500,16 +495,16 @@ do realization=1,QW
     end if
 
     if (counter1==20000) then
-      write(uEE,*) total_EE
-      write(unn,*) total_nn
+      write(uEE) total_EE
+      write(unn) total_nn
       counter1=0
     end if
 
   end do ! tt1
 
   if (counter1>0) then
-    write(uEE,*) total_EE
-    write(uNN,*) total_nn
+    write(uEE) total_EE
+    write(uNN) total_nn
   end if
 
 

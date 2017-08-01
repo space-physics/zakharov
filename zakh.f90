@@ -192,9 +192,9 @@ do beamj=1,Nvbeam
     end if
 
     omegaL(ii)=sqrt(omegae**2.0_wp+3*k(ii)*ve**2.0_wp)
-    gamas= (-1)*sqrt(pi/8)*(sqrt(me/mi)+ Te/Ti**2.0_wp/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)-1.5))*abs(k(ii))*Cs
-		!gamas= (-1)*sqrt(pi/2)*(sqrt(me/mi)+4*pow(Te/2/Ti,2)/sqrt(Te/2/Ti)*exp((-1)*(Te*4/Ti)))*abs(k(ii))*Cs*10   //based on Robinson 2002
-		!gamas= (-1)*sqrt(pi/8)*pow(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te,2)/sqrt(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)/(1+k(ii)*k(ii)*lambdaD*lambdaD)-1.5))*abs(k(ii))*Cs   //Based on some Chinese paper!!
+    gamas= -1.0_wp*sqrt(pi/8)*(sqrt(me/mi)+ Te/Ti**2.0_wp/sqrt(Te/Ti)*exp(-1.0_wp*(Te/2.0/Ti)-1.5))*abs(k(ii))*Cs
+		!gamas= -1.0_wp*sqrt(pi/2)*(sqrt(me/mi)+4*pow(Te/2/Ti,2)/sqrt(Te/2/Ti)*exp(-1.0_wp*(Te*4/Ti)))*abs(k(ii))*Cs*10   //based on Robinson 2002
+		!gamas= -1.0_wp*sqrt(pi/8)*pow(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te,2)/sqrt(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp(-1.0_wp*(Te/2.0/Ti)/(1+k(ii)*k(ii)*lambdaD*lambdaD)-1.5))*abs(k(ii))*Cs   //Based on some Chinese paper!!
     nui(ii)=(nuic/2-gamas)
 
     if (ii==N/2) then
@@ -204,15 +204,15 @@ do beamj=1,Nvbeam
       Source_factor_n(ii)=0.0_wp
       Source_factor_E(ii)=0.0_wp
     else
-      gamal1=(-1)*sqrt(pi/8)* omegae/k(ii)/ve**2.0_wp * sign(1.0_wp,k(ii)) * omegaL(ii)**2.0_wp / &
-              (k(ii)*ve)*exp((-1)*omegaL(ii)/k(ii)/ve**2.0_wp/2)  !Landau damping due to the thermal electrons
+      gamal1=-1.0_wp*sqrt(pi/8)* omegae/k(ii)/ve**2.0_wp * sign(1.0_wp,k(ii)) * omegaL(ii)**2.0_wp / &
+              (k(ii)*ve)*exp(-1.0_wp*omegaL(ii)/k(ii)/ve**2.0_wp/2)  !Landau damping due to the thermal electrons
 
-      gamal2=(-1)*sqrt(pi/8)* omegae / k(ii) / tetabeam(beamj)**2.0_wp * sign(1.0_wp,k(ii)) * nbeam(beami) / &
+      gamal2=-1.0_wp*sqrt(pi/8)* omegae / k(ii) / tetabeam(beamj)**2.0_wp * sign(1.0_wp,k(ii)) * nbeam(beami) / &
               n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam(beamj)) / (k(ii)*tetabeam(beamj)) * &
-              exp((-1)* omegaL(ii)-k(ii)*vbeam(beamj) / k(ii) / tetabeam(beamj)**2.0_wp/2) !Landau damping due to the beam
-!gamal2=(-1)*sqrt(pi/8)*pow(omegae/k(ii)/tetabeam.at(beamj),2)* sign(1,k(ii)) *nbeam.at(beami)/n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam.at(beamj))/(k(ii)*tetabeam.at(beamj))*exp((-1)*pow((omegaL(ii)-k(ii)*vbeam.at(beamj))/k(ii)/tetabeam.at(beamj),2)/2)  //Landau damping due to the beam
-      gamal3=(-1)*sqrt(pi)*omegae*omegaL(ii)**2.0_wp / k(ii)**3.0_wp * sign(1.0_wp,k(ii)) *se_cte * &
-              (1+ omegaL(ii)**2.0_wp/kappa/ k(ii)*theta_se**2.0_wp)**((-1)*(kappa+1))
+              exp(-1.0_wp* omegaL(ii)-k(ii)*vbeam(beamj) / k(ii) / tetabeam(beamj)**2.0_wp/2) !Landau damping due to the beam
+!gamal2=-1.0_wp*sqrt(pi/8)*pow(omegae/k(ii)/tetabeam.at(beamj),2)* sign(1,k(ii)) *nbeam.at(beami)/n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam.at(beamj))/(k(ii)*tetabeam.at(beamj))*exp(-1.0_wp*pow((omegaL(ii)-k(ii)*vbeam.at(beamj))/k(ii)/tetabeam.at(beamj),2)/2)  //Landau damping due to the beam
+      gamal3=-1.0_wp*sqrt(pi)*omegae*omegaL(ii)**2.0_wp / k(ii)**3.0_wp * sign(1.0_wp,k(ii)) *se_cte * &
+              (1+ omegaL(ii)**2.0_wp/kappa/ k(ii)*theta_se**2.0_wp)**(-1.0_wp*(kappa+1))
 
       gamal=gamal1*(1-se_percent)+gamal2+se_percent*gamal3 ! here decide to include the beam and Kappa distribution
       nue(ii) = nuec/2-gamal1
@@ -248,7 +248,7 @@ do beamj=1,Nvbeam
 
 
   do realization=1,QW
-    cte2=omegae/2.0_wp/n0/1
+    cte2=omegae/2.0_wp/n0
 
     call system_clock(clock)
 !    seed = clock + 37 * [ (i - 1, i = 1, nseed) ]
@@ -309,7 +309,7 @@ do beamj=1,Nvbeam
         cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
   			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
-        k1(pp,2)=Tstep*((-1)*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
+        k1(pp,2)=Tstep*(-1.0_wp*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
       end do ! pp N
 
 
@@ -327,7 +327,7 @@ do beamj=1,Nvbeam
   			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k2(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
                   nuE(pp) * (EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
-        k2(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
+        k2(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
                   nuE(pp)*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1))
 
       end do ! pp N
@@ -347,7 +347,7 @@ do beamj=1,Nvbeam
   			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k3(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
                 nuE(pp)*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
-        k3(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
+        k3(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
                 nuE(pp)*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1))
 
       end do ! pp N
@@ -368,10 +368,11 @@ do beamj=1,Nvbeam
         cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
   			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
         k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2))
-        k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1))
+        k4(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep) - &
+            nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1))
 
-        EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep ! no vect
-        EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep ! no vect
+        EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2) * Tstep ! no vect
+        EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1) * Tstep ! no vect
         EE(c2,N/2,:)=0.0_wp
       end do ! pp N
 
@@ -391,7 +392,7 @@ do beamj=1,Nvbeam
         end do
 
         kn1(:)=Tstep*(vv(c1,pp,:))
-        kv1(:)=Tstep*(-2.0*nui(pp)*vv(c1,pp,:) - Cs*k(pp)**2 *nn(c1,pp,:)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+        kv1(:)=Tstep*(-2.0_wp*nui(pp)*vv(c1,pp,:) - Cs*k(pp)**2.0_wp *nn(c1,pp,:)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
 
         CC(:)=0.0_wp
 
@@ -405,8 +406,8 @@ do beamj=1,Nvbeam
 
         kn2(:)=Tstep*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)
 
-        kv2(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)- &
-                Cs*k(pp)**2 *(nn(c1,pp,:)+kn1(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+        kv2(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)- &
+                Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn1(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
 
         CC(:)=0.0_wp
 
@@ -419,8 +420,8 @@ do beamj=1,Nvbeam
 
         kn3(:)=Tstep*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep)
 
-        kv3(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep) - &
-               Cs*k(pp)**2 *(nn(c1,pp,:)+kn2(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+        kv3(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep) - &
+               Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn2(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
 
 
 
@@ -433,8 +434,8 @@ do beamj=1,Nvbeam
         end do
 
         kn4(:)=Tstep*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep)
-        kv4(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep) - &
-               Cs*k(pp)**2 *(nn(c1,pp,:)+kn3(:))-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+        kv4(:)=Tstep*(-2.0_wp*nui(pp)*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep) - &
+               Cs*k(pp)**2.0_wp *(nn(c1,pp,:)+kn3(:))-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
 
 
         vv(c2,pp,:)=vv(c1,pp,:)+(kv1(:)+2*kv2(:)+2*kv3(:)+kv4(:))/6+SSn(:)*Tstep

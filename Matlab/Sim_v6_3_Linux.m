@@ -175,41 +175,41 @@ if doWriteResults
  saveas(gcf,[newpath,filesep,'results',filesep,'n' num2str(Nnbeam,'%03d') '_v' num2str(Nvbeam,'%03d'),filesep,'n_kt'],'fig');
 end
 
-figure(100);
+figure(100)
 X1=linspace(0,1/3*sqrt(P.me/P.mi)/P.lambdaD,100);
 Y1=(X1*P.lambdaD).^2;
 % figure(101);
-semilogy(X1,Y1,'k','LineWidth',3);
-hold on;
+semilogy(X1,Y1,'k','LineWidth',3)
+hold on
 % semilogy(-X1,Y1,'k','LineWidth',3);
 X2=X1(end)+linspace(0,k(end),1000);
 Y2=X2*P.lambdaD*sqrt(P.me/P.mi); Y2=Y2-Y2(1)+Y1(end);
 semilogy(X2,Y2,'k','LineWidth',3);
 % semilogy(-X2,Y2,'k','LineWidth',3);
 Y2=(X2*P.lambdaD).^4*P.mi/P.me; Y2=Y2-Y2(1)+Y1(end);
-semilogy(X2,Y2,'k','LineWidth',3);
+semilogy(X2,Y2,'k','LineWidth',3)
 % semilogy(-X2,Y2,'k','LineWidth',3);
 Y2=Y1(end)*ones(1,length(X1));
-semilogy(X1,Y2,'k','LineWidth',3);
+semilogy(X1,Y2,'k','LineWidth',3)
 % semilogy(-X1,Y2,'k','LineWidth',3);
 Y2=linspace(0,1,length(X1))*Y1(end);
 X2=ones(1,length(X1))*X1(end);
-semilogy(X2,Y2,'k','LineWidth',3);
+semilogy(X2,Y2,'k','LineWidth',3)
 % semilogy(-X2,Y2,'k','LineWidth',3);
-hold off;
+hold off
 title([instantiation])
 
 resolution=1.0; %in ms
 resolution=length(taxis)/(taxis(end)/resolution);
 [EE_max, kk_max]=max(EE_ss);
 W=.5*P.epsilon0*(EE_max(resolution:resolution:end))/(P.n0*P.Kb*P.Te);
-figure(100);
-hold on;
-semilogy(abs(k(kk_max(resolution:resolution:end))),W);
-semilogy(abs(k(kk_max(resolution:resolution:end))),W,'b*');
-hold off;
-xlabel('Wave number (m^-^1)');
-ylabel('Electrostatic to thermal energy ration');
+figure(100)
+hold on
+semilogy(abs(k(kk_max(resolution:resolution:end))),W)
+semilogy(abs(k(kk_max(resolution:resolution:end))),W,'b*')
+hold off
+xlabel('Wave number (m^-^1)')
+ylabel('Electrostatic to thermal energy ration')
 if doWriteResults
  saveas(gcf,[newpath,filesep,'results',filesep,'n' num2str(Nnbeam,'%03d') '_v' num2str(Nvbeam,'%03d'),filesep,'regiems'],'fig');
 end

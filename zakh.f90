@@ -26,7 +26,7 @@ real(wp), parameter :: n0=5.0e11_wp ! background density
 
 real(wp), parameter :: vbeam_ev(*) = [500.0_wp]
 integer, parameter :: Nvbeam=size(vbeam_ev)
-real(wp) :: vbeam(Nvbeam), tetabeam (Nvbeam)
+real(wp) :: vbeam(Nvbeam), tetabeam(Nvbeam)
 
 
 real(wp), parameter :: power_n_cte=7.7735e6_wp/sqrt(53.5_wp)
@@ -46,7 +46,7 @@ real(wp), parameter :: endTime=100.0e-3_wp ! simulation ends (seconds)
 real(wp), parameter :: Tstep=0.5e-7_wp ! simulation time steps
 integer, parameter :: TT= floor(endTime / Tstep)              ! floor(endTime/Tstep)+2;
 integer, parameter :: res=20
-!integer, parameter :: TT_res = floor(endTime/Tstep/res)  !floor(endTime/Tstep/res);
+integer, parameter :: TT_res = floor(endTime/Tstep/res)  !floor(endTime/Tstep/res);
 real(wp), parameter :: L=70.0_wp           ! simulation box length (meter)j
 integer, parameter :: N=2046          ! number of samples in L; should be devidable by 6
 real(wp), parameter :: Xstep= L / N
@@ -79,13 +79,11 @@ real(wp) :: k(N), Xsection_ion=0.0_wp, Xsection_pl=0.0_wp, E_thermal_k_squared, 
 
 type params
 
-
-    real(wp) :: pi, me,electroncharge,mi, Kb,eV,epsilon0, Te, Ti, nuic, nuec, n0, nbeam, &
+  real(wp) :: pi, me,electroncharge,mi, Kb,eV,epsilon0, Te, Ti, nuic, nuec, n0, nbeam, &
             vbeam_ev, vbeam, tetabeam, endTime, Tstep, TT, res, TT_res, L, N, Xstep, QW, &
-            SEED, eta, ve, Cs, omegae, lambdaD
-    integer :: Z
+            eta, ve, Cs, omegae, lambdaD
 
-  	! nbeam.at(beami); vbeam_ev.at(beamj); vbeam.at(beamj); tetabeam.at(beamj);
+  integer :: Z
 !  	//have to include other parameters regarding the Kappa distribution
 
 end type params
@@ -108,6 +106,7 @@ argc = command_argument_count()
 call get_command_argument(1,argv)
 odir = trim(argv)
 print *,'writing output to', odir
+call execute_command_line('mkdir -p '//odir)
 
 allocate(beamev(argc-1))
 do i = 2,argc
@@ -133,17 +132,52 @@ vbeam=sqrt(eV*vbeam_ev*2/me)
 print *,"vbeam=",vbeam
 print *,"tetabeam=",tetabeam
 
+call random_seed(size=nseed)
+allocate(seed(nseed))
+
 do beami=1,Nnbeam
 do beamj=1,Nvbeam
 
-! TODO: may have blank spaces in filename
+  parameters%pi = pi
+  parameters%me = me
+  parameters%electroncharge = electroncharge
+  parameters%mi = mi
+  parameters%Z = Z
+  parameters%Kb = Kb
+  parameters%eV = eV
+  parameters%epsilon0= epsilon0
+  parameters%Te = Te
+  parameters%Ti = Ti
+  parameters%nuic = nuic
+  parameters%nuec= nuec
+  parameters%n0 = n0
+  parameters%nbeam = nbeam(beami)
+  parameters%vbeam_ev = vbeam_ev(beamj)
+  parameters%vbeam = vbeam(beamj)
+  parameters%tetabeam = tetabeam(beamj)
+  parameters%endTime = endTime
+  parameters%Tstep = Tstep
+  parameters%TT = TT
+  parameters%res = res
+  parameters%TT_res = TT_res
+  parameters%L = L
+  parameters%N = N
+  parameters%Xstep = Xstep
+  parameters%QW = QW
+  parameters%eta = eta
+  parameters%ve = ve
+  parameters%Cs = Cs
+  parameters%omegae = omegae
+  parameters%lambdaD = lambdaD
+
   write(argv,'(A,I0.3,A,I0.3)')  odir//"/parameters_n" , beami, "_v" , beamj
   ofn = trim(argv)
 
-  open(newunit=u,file=ofn,status='unknown',action='write')
+  open(newunit=u, file=ofn, form='formatted',status='unknown',action='write')
   write(u,*) parameters
+  write(u,*) SEED
   close(u)
-  print *, "Wrote",parameters,"to",ofn
+  print *, "Wrote",parameters,SEED,"to",ofn
 
   do ii=1,N
     p(ii)=ii-N/2
@@ -211,7 +245,7 @@ do beamj=1,Nvbeam
     output1(ii,12) = Source_factor_n(ii)
   end do ! ii
 
-  write(argv,'(A,I0.3,A,I0.3)') odir//"output1_n",beami,"_v", beamj
+  write(argv,'(A,I0.3,A,I0.3)') odir//"/output1_n",beami,"_v", beamj
   open(newunit=u,file=trim(argv),status='unknown',action='write')
 
   write(u,*) output1
@@ -223,17 +257,17 @@ do beamj=1,Nvbeam
 do realization=1,QW
   cte2=omegae/2.0_wp/n0/1
 
-  call random_seed(size=nseed)
-  allocate(seed(nseed))
   call system_clock(clock)
   seed = clock + 37 * [ (i - 1, i = 1, nseed) ]
   call random_seed(put=seed)
 
-  write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"EE",realization,"_n",beami,"_v",beamj
+  write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/EE",realization,"_n",beami,"_v",beamj
   open(newunit=uEE,file=trim(argv), status='unknown',action='write')
+  print *,'writing to',trim(argv)
 
-  write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"nn",realization, "_n" ,beami, "_v",beamj
+  write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/nn",realization, "_n" ,beami, "_v",beamj
   open(newunit=uNN,file=trim(argv), status='unknown',action='write')
+  print *,'writing to',trim(argv)
 
 !   main loops
 
@@ -272,8 +306,8 @@ do realization=1,QW
 !		long double omega_off=omegae+2*pi*300000;
 
 		! update display every 50th iteration
-    if (mod(tt1,50) == 0) print '(A,I0.3,F5.2,A,I0.3,A,I0.3)',"Realization:",&
-        realization+1,tt1*100.0/TT,"% complete.  n",beami,"v",beamj
+    if (mod(tt1,50) == 0) print '(A,I0.3,F5.2,A,I0.3,A,I0.3)',"Realization: ",&
+        realization,tt1*100.0/TT,"% complete.  n",beami," v",beamj
 
     do pp=1,N
 

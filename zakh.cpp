@@ -5,7 +5,7 @@
 //Michael Hirsch Oct 2013 -- updated vbeam,tetabeam to use C++ vector format
 
 #include <boost/filesystem.hpp>
-#include "boost/program_options.hpp" 
+#include "boost/program_options.hpp"
 #include <iostream>
 #include <vector>
 #include <cstdio>
@@ -82,50 +82,50 @@ int main(int argc, char ** argv)
 
 
 // argparse
-    namespace po = boost::program_options; 
-    po::options_description desc("Options"); 
-    desc.add_options() 
+    namespace po = boost::program_options;
+    po::options_description desc("Options");
+    desc.add_options()
       ("help,h", "Print help messages")
       ("outdir,o",po::value<std::string>(&odir)->required(), "Output directory")
       ("ev",po::value<std::vector<double> >()->multitoken()->required(),"list of beam energies [eV]"); //semicolon after last option
- 
-    po::variables_map vm; 
-    try 
-    { 
-      po::store(po::parse_command_line(argc, argv, desc),  
-                vm); // can throw 
- 
-      /** --help option 
-       */ 
-      if ( vm.count("help")  ) 
-      { 
-        std::cout << "Basic Command Line Parameter App" << std::endl 
-                  << desc << std::endl; 
-        return EXIT_SUCCESS; 
-      } 
- 
-      po::notify(vm); // throws on error, so do after help in case 
-                      // there are any problems 
+
+    po::variables_map vm;
+    try
+    {
+      po::store(po::parse_command_line(argc, argv, desc),
+                vm); // can throw
+
+      /** --help option
+       */
+      if ( vm.count("help")  )
+      {
+        std::cout << "Basic Command Line Parameter App" << std::endl
+                  << desc << std::endl;
+        return EXIT_SUCCESS;
+      }
+
+      po::notify(vm); // throws on error, so do after help in case
+                      // there are any problems
 
 
-    } 
-    catch(po::error& e) 
-    { 
-      std::cerr << "ERROR: " << e.what() << std::endl; 
-      std::cerr << desc << std::endl; 
-      return EXIT_FAILURE; 
-    } 
+    }
+    catch(po::error& e)
+    {
+      std::cerr << "ERROR: " << e.what() << std::endl;
+      std::cerr << desc << std::endl;
+      return EXIT_FAILURE;
+    }
 
 
 // store variables
     std::vector<double> beamev = vm["ev"].as<std::vector<double> >();
-    int Nnbeam=beamev.size(); 
+    int Nnbeam=beamev.size();
 
     std::vector<double> nbeam(Nnbeam);
 
     for (int i=0; i<Nnbeam; i++)
         nbeam[i] = beamev[i]*n0;
-    
+
 
 //-------------------------------------------------------------------------------------
 // create output directory if it doesn't exist
@@ -221,7 +221,7 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	parameters[30]=omegae;
 	parameters[31]=lambdaD;
 	//have to include other parameters regarding the Kappa distribution
-	
+
 	std::string fn = outDir + "parameters_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
 	const char* fnp = fn.c_str();
 	FILE* parameters_out;
@@ -320,7 +320,7 @@ for (int realization=0;realization<QW;realization++){
     const char* nameE = fn.c_str();
 	FILE* EE_out;
 	EE_out = fopen(nameE, "wb");
-	
+
 	fn = outDir + "nn" + std::to_string(SEED+realization) + "_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
     const char* namen = fn.c_str();
 	FILE* nn_out;
@@ -546,7 +546,7 @@ for (int realization=0;realization<QW;realization++){
 				counter1=0;
 			}
 
-		}
+		} // tt1
 
 	if (counter1>0){
 		fwrite(total_EE, 1, sizeof(double)*counter1*N*2, EE_out);
@@ -581,5 +581,3 @@ void Xsection(double& Xsec_ion, double& Xsec_pl,double k){
 	double XX=2*pi*(1+pow(alpha,2)*Z*Te/Ti)/(1+pow(alpha,2)+pow(alpha,2)*(Z*Te/Ti));
 	Xsec_pl=XX-Te/Ti*Xsec_ion;
 }
-
-

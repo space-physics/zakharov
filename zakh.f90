@@ -251,217 +251,219 @@ do beamj=1,Nvbeam
   print *, "Wrote to ", trim(argv)
 
 
-do realization=1,QW
-  cte2=omegae/2.0_wp/n0/1
+  do realization=1,QW
+    cte2=omegae/2.0_wp/n0/1
 
-  call system_clock(clock)
-  seed = clock + 37 * [ (i - 1, i = 1, nseed) ]
-  call random_seed(put=seed)
+    call system_clock(clock)
+    seed = clock + 37 * [ (i - 1, i = 1, nseed) ]
+    call random_seed(put=seed)
 
-  write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/EE",realization,"_n",beami,"_v",beamj
-  open(newunit=uEE,file=trim(argv), status='new',action='write',access='stream')
-  print *,'writing to ',trim(argv)
+    write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/EE",realization,"_n",beami,"_v",beamj
+    open(newunit=uEE,file=trim(argv), status='new',action='write',access='stream')
+    print *,'writing to ',trim(argv)
 
-  write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/nn",realization, "_n" ,beami, "_v",beamj
-  open(newunit=uNN,file=trim(argv), status='new',action='write',access='stream')
-  print *,'writing to ',trim(argv)
+    write(argv,'(A,I0.3,A,I0.3,A,I0.3)') odir//"/nn",realization, "_n" ,beami, "_v",beamj
+    open(newunit=uNN,file=trim(argv), status='new',action='write',access='stream')
+    print *,'writing to ',trim(argv)
 
-!   main loops
+  !   main loops
 
-vv(:,:,:)=0.0_wp
+    vv(:,:,:)=0.0_wp
 
-  do iij1=1,3
-    call random_number(rdist)
-    EE (iij1,:,1)=sqrt(output1(:,5)/2.0)*rdist
-    call random_number(rdist)
-    EE (iij1,:,2)=sqrt(output1(:,5)/2.0)*rdist
-    call random_number(rdist)
-    nn (iij1,:,1)=sqrt(output1(:,6)/2.0)*rdist
-    call random_number(rdist)
-    nn (iij1,:,2)=sqrt(output1(:,6)/2.0)*rdist
-  end do ! iij1 4
+    do iij1=1,3
+      call random_number(rdist)
+      EE (iij1,:,1)=sqrt(output1(:,5)/2.0)*rdist
+      call random_number(rdist)
+      EE (iij1,:,2)=sqrt(output1(:,5)/2.0)*rdist
+      call random_number(rdist)
+      nn (iij1,:,1)=sqrt(output1(:,6)/2.0)*rdist
+      call random_number(rdist)
+      nn (iij1,:,2)=sqrt(output1(:,6)/2.0)*rdist
+    end do ! iij1 4
 
-  nn(:,N-N/2+1:N,1) = nn(:,:N/2,1)
-  nn(:,N-N/2+1:N,2) = -nn(:,:N/2,2) ! yes minus
-  nn(:,N/2,:)=0.0_wp
+    nn(:,N-N/2+1:N,1) = nn(:,:N/2,1)
+    nn(:,N-N/2+1:N,2) = -nn(:,:N/2,2) ! yes minus
+    nn(:,N/2,:)=0.0_wp
 
-  do tt1=1,TT
+    do tt1=1,TT
 
-!		int c0=(tt1-1) % 3;
-    c1= mod(tt1, 3)+1
-    c2= mod(tt1+1, 3)+1
-!		long double omega_off=omegae+2*pi*300000;
+  !		int c0=(tt1-1) % 3;
+      c1= mod(tt1, 3)+1
+      c2= mod(tt1+1, 3)+1
+  !		long double omega_off=omegae+2*pi*300000;
 
-		! update display every 50th iteration
-    if (mod(tt1,50) == 0) print '(A,I0.3,F7.2,A,I0.3,A,I0.3)',"Realization: ",&
-        realization,tt1*100.0/TT,"% complete.  n",beami," v",beamj
+  		! update display every 50th iteration
+      if (mod(tt1,50) == 0) print '(A,I0.3,F7.2,A,I0.3,A,I0.3)',"Realization: ",&
+          realization,tt1*100.0/TT,"% complete.  n",beami," v",beamj
 
-    do pp=1,N
+      do pp=1,N
 
-      LL = max(p(pp)-N/3,-N/3)
-      UU = min(N/3,p(pp)+N/3)
-      CC(:)=0.0_wp
+        LL = max(p(pp)-N/3,-N/3)
+        UU = min(N/3,p(pp)+N/3)
+        CC(:)=0.0_wp
 
-      do q=LL,UU
-        CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
-        CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1);
-      end do
+        do q=LL,UU
+          CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
+          CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1);
+        end do
 
-      call random_number(rdist(:2))
-      SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
+        call random_number(rdist(:2))
+        SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
 
-      cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
-      k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
-      k1(pp,2)=Tstep*((-1)*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
-    end do ! pp N
-
-
-    do pp=1,N
-      LL= max(p(pp)-N/3,-N/3)
-      UU= min(N/3,p(pp)+N/3)
-      CC(:)=0.0_wp
-
-      do q=LL,UU
-        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,2)
-        CC(2)=CC(2)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1)
-      end do
-
-      cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
-      k2(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
-                nuE(pp) * (EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
-      k2(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
-                nuE(pp)*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1))
-
-    end do ! pp N
+        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
+        k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
+        k1(pp,2)=Tstep*((-1)*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
+      end do ! pp N
 
 
-    do pp=1,N
-      LL= max(p(pp)-N/3,-N/3)
-      UU= min(N/3,p(pp)+N/3)
-      CC(:)=0.0_wp
+      do pp=1,N
+        LL= max(p(pp)-N/3,-N/3)
+        UU= min(N/3,p(pp)+N/3)
+        CC(:)=0.0_wp
 
-      do q=LL,UU
-        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,2);
-        CC(2)=CC(2)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1);
-      end do
+        do q=LL,UU
+          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,2)
+          CC(2)=CC(2)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1)
+        end do
 
-      cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
-      k3(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
-              nuE(pp)*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2));
-      k3(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
-              nuE(pp)*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1));
+        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
+        k2(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
+                  nuE(pp) * (EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
+        k2(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
+                  nuE(pp)*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1))
 
-    end do ! pp N
-
-
-    do pp=1,N
-      LL= max(p(pp)-N/3,-N/3);
-      UU= min(N/3,p(pp)+N/3);
-      CC(:)=0.0_wp
-
-      do q=LL,UU
-        ! no vect
-        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,2);
-        CC(2)=CC(2)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,1);
-      end do
+      end do ! pp N
 
 
-      cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
-			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
-      k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2));
-      k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1))
+      do pp=1,N
+        LL= max(p(pp)-N/3,-N/3)
+        UU= min(N/3,p(pp)+N/3)
+        CC(:)=0.0_wp
 
-      EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep ! no vect
-      EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep ! no vect
-      EE(c2,N/2,:)=0.0_wp
+        do q=LL,UU
+          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,2);
+          CC(2)=CC(2)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1);
+        end do
 
+        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
+        k3(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
+                nuE(pp)*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2));
+        k3(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
+                nuE(pp)*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1));
 
-    end do ! pp N
-
-
-    do pp=1,N/2
-      call random_number(rdist(:2))
-      SSn(:)= rdist(:2)*Source_factor_n(pp)/sqrt(Tstep);
-
-      LL= max(p(pp)-N/3,-N/3);
-      UU= min(N/3,p(pp)+N/3);
-      CC(:)=0.0_wp
-
-      do q=LL,UU
-        CC(1)=CC(1)+EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,1)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,2);
-        CC(2)=CC(2)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,1)-EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,2);
-      end do
-
-      kn1(:)=Tstep*(vv(c1,pp,:))
-      kv1(:)=Tstep*((-2.0)*nui(pp)*vv(c1,pp,:)- Cs*k(pp)**2 *nn(c1,pp,:)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
-
-      CC(:)=0.0_wp
-
-      do q=LL,UU
-        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)+ &
-              (EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
-        CC(2)=CC(2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)- &
-              (EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
-      end do
-
-      kn2(:)=Tstep*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)
-
-      kv2(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)- &
-              Cs*k(pp)**2 *(nn(c1,pp,:)+kn1(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
-
-      CC(:)=0.0_wp
-
-      do q=LL,UU
-        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) + &
-              (EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
-        CC(2)=CC(2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) - &
-              (EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
-      end do
-
-      kn3(:)=Tstep*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep)
-
-      kv3(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep) - &
-             Cs*k(pp)**2 *(nn(c1,pp,:)+kn2(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+      end do ! pp N
 
 
+      do pp=1,N
+        LL= max(p(pp)-N/3,-N/3);
+        UU= min(N/3,p(pp)+N/3);
+        CC(:)=0.0_wp
 
-      CC(:)=0.0_wp
-      do q=LL,UU
-        CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) + &
-              (EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
-        CC(2)=CC(2)+(EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) - &
-              (EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
-      end do
-
-      kn4(:)=Tstep*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep)
-      kv4(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep) - &
-             Cs*k(pp)**2 *(nn(c1,pp,:)+kn3(:))-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+        do q=LL,UU
+          ! no vect
+          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,2);
+          CC(2)=CC(2)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,1);
+        end do
 
 
-      vv(c2,pp,:)=vv(c1,pp,:)+(kv1(:)+2*kv2(:)+2*kv3(:)+kv4(:))/6+SSn(:)*Tstep
-      nn(c2,pp,:)=nn(c1,pp,:)+(kn1(:)+2*kn2(:)+2*kn3(:)+kn4(:))/6
-      nn(c2,N/2,:)=0.0_wp
+        cte1=1.5*omegae*(lambdaD*k(pp))*(lambdaD*k(pp))
+  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off;
+        k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2));
+        k4(pp,2)=Tstep*((-1)*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)-nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1))
 
-      if (pp>=1) then
-        nn(c2,N-pp,1)=nn(c2,pp,1)
-        nn(c2,N-pp,2)=-nn(c2,pp,2)
+        EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2)*Tstep ! no vect
+        EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1)*Tstep ! no vect
+        EE(c2,N/2,:)=0.0_wp
+      end do ! pp N
+
+
+      do pp=1,N/2
+        call random_number(rdist(:2))
+        SSn(:)= rdist(:2)*Source_factor_n(pp)/sqrt(Tstep);
+
+        LL= max(p(pp)-N/3,-N/3);
+        UU= min(N/3,p(pp)+N/3);
+        CC(:)=0.0_wp
+
+        do q=LL,UU
+          ! no vect
+          CC(1)=CC(1)+EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,1)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,2);
+          CC(2)=CC(2)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,1)-EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,2);
+        end do
+
+        kn1(:)=Tstep*(vv(c1,pp,:))
+        kv1(:)=Tstep*(-2.0*nui(pp)*vv(c1,pp,:) - Cs*k(pp)**2 *nn(c1,pp,:)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+
+        CC(:)=0.0_wp
+
+        do q=LL,UU
+          ! no vect
+          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)+ &
+                (EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
+          CC(2)=CC(2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k1(q-p(pp)+N/2,1)/2)- &
+                (EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
+        end do
+
+        kn2(:)=Tstep*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)
+
+        kv2(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)- &
+                Cs*k(pp)**2 *(nn(c1,pp,:)+kn1(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+
+        CC(:)=0.0_wp
+
+        do q=LL,UU
+          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) + &
+                (EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
+          CC(2)=CC(2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) - &
+                (EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
+        end do
+
+        kn3(:)=Tstep*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep)
+
+        kv3(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep) - &
+               Cs*k(pp)**2 *(nn(c1,pp,:)+kn2(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+
+
+
+        CC(:)=0.0_wp
+        do q=LL,UU
+          CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) + &
+                (EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
+          CC(2)=CC(2)+(EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) - &
+                (EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);
+        end do
+
+        kn4(:)=Tstep*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep)
+        kv4(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv3(:)+SSn(:)*Tstep) - &
+               Cs*k(pp)**2 *(nn(c1,pp,:)+kn3(:))-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+
+
+        vv(c2,pp,:)=vv(c1,pp,:)+(kv1(:)+2*kv2(:)+2*kv3(:)+kv4(:))/6+SSn(:)*Tstep
+        nn(c2,pp,:)=nn(c1,pp,:)+(kn1(:)+2*kn2(:)+2*kn3(:)+kn4(:))/6
+        nn(c2,N/2,:)=0.0_wp
+
+        if (pp>=1) then
+          nn(c2,N-pp,1)=nn(c2,pp,1)
+          nn(c2,N-pp,2)=-nn(c2,pp,2)
+        end if
+
+      end do ! pp N/2
+
+  ! WRITE TO FILE
+      if ( mod(tt1,res) == 0) then
+        write(uEE) EE(c2,:,:)
+        write(unn) nn(c2,:,:)
       end if
 
-    end do ! pp N/2
+    end do ! tt1
 
-    if ( mod(tt1,res) == 0) then
-      write(uEE) EE(c2,:,:)
-      write(unn) nn(c2,:,:)
-    end if
+    close(uEE)
+    close(unn)
 
-  end do ! tt1
-
-  close(uEE)
-  close(unn)
-end do !relizations
+  end do !realizations
 end do !Nvbeam
 end do !Nnbeam
 

@@ -302,8 +302,7 @@ vv(:,:,:)=0.0_wp
 
       LL = max(p(pp)-N/3,-N/3)
       UU = min(N/3,p(pp)+N/3)
-      CC(1)=0.0;
-      CC(2)=0.0;
+      CC(:)=0.0_wp
 
       do q=LL,UU
         CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
@@ -323,8 +322,7 @@ vv(:,:,:)=0.0_wp
     do pp=1,N
       LL= max(p(pp)-N/3,-N/3)
       UU= min(N/3,p(pp)+N/3)
-      CC(1)=0.0
-      CC(2)=0.0
+      CC(:)=0.0_wp
 
       do q=LL,UU
         CC(1)=CC(1)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,2)
@@ -344,8 +342,7 @@ vv(:,:,:)=0.0_wp
     do pp=1,N
       LL= max(p(pp)-N/3,-N/3)
       UU= min(N/3,p(pp)+N/3)
-      CC(1)=0.0
-      CC(2)=0.0
+      CC(:)=0.0_wp
 
       do q=LL,UU
         CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,2);
@@ -365,8 +362,7 @@ vv(:,:,:)=0.0_wp
     do pp=1,N
       LL= max(p(pp)-N/3,-N/3);
       UU= min(N/3,p(pp)+N/3);
-      CC(1)=0.0;
-      CC(2)=0.0;
+      CC(:)=0.0_wp
 
       do q=LL,UU
         CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1))*nn(c1,p(pp)-q+N/2,1)-(EE(c1,q+N/2,2)+k3(q+N/2,2))*nn(c1,p(pp)-q+N/2,2);
@@ -393,8 +389,7 @@ vv(:,:,:)=0.0_wp
 
       LL= max(p(pp)-N/3,-N/3);
       UU= min(N/3,p(pp)+N/3);
-      CC(1)=0.0;
-      CC(2)=0.0;
+      CC(:)=0.0_wp
 
       do q=LL,UU
         CC(1)=CC(1)+EE(c1,q+N/2,1)*EE(c1,q-p(pp)+N/2,1)+EE(c1,q+N/2,2)*EE(c1,q-p(pp)+N/2,2);
@@ -413,15 +408,12 @@ vv(:,:,:)=0.0_wp
               (EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k1(q-p(pp)+N/2,2)/2);
       end do
 
-      kn2(1)=Tstep*(vv(c1,pp,1)+kv1(1)/2+SSn(1)/2*Tstep);
-      kn2(2)=Tstep*(vv(c1,pp,2)+kv1(2)/2+SSn(2)/2*Tstep);
-      kv2(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv1(1)/2+SSn(1)/2*Tstep)- &
-              Cs*k(pp)**2 *(nn(c1,pp,1)+kn1(1)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(1))
-      kv2(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv1(2)/2+SSn(2)/2*Tstep)- &
-              Cs*k(pp)**2 *(nn(c1,pp,2)+kn1(2)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2))
+      kn2(:)=Tstep*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)
 
-      CC(1)=0.0;
-      CC(2)=0.0;
+      kv2(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv1(:)/2+SSn(:)/2*Tstep)- &
+              Cs*k(pp)**2 *(nn(c1,pp,:)+kn1(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
+
+      CC(:)=0.0_wp
 
       do q=LL,UU
         CC(1)=CC(1)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k2(q-p(pp)+N/2,1)/2) + &
@@ -430,16 +422,14 @@ vv(:,:,:)=0.0_wp
               (EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,2)+k2(q-p(pp)+N/2,2)/2);
       end do
 
-      kn3(1)=Tstep*(vv(c1,pp,1)+kv2(1)/2+SSn(1)/2*Tstep)
-      kn3(2)=Tstep*(vv(c1,pp,2)+kv2(2)/2+SSn(2)/2*Tstep)
-      kv3(1)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,1)+kv2(1)/2+SSn(1)/2*Tstep) - &
-             Cs*k(pp)**2 *(nn(c1,pp,1)+kn2(1)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(1))
-      kv3(2)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,2)+kv2(2)/2+SSn(2)/2*Tstep) - &
-             Cs*k(pp)**2 *(nn(c1,pp,2)+kn2(2)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(2))
+      kn3(:)=Tstep*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep)
+
+      kv3(:)=Tstep*((-2.0)*nui(pp)*(vv(c1,pp,:)+kv2(:)/2+SSn(:)/2*Tstep) - &
+             Cs*k(pp)**2 *(nn(c1,pp,:)+kn2(:)/2)-k(pp)*k(pp)*epsilon0/4/mi*CC(:))
 
 
-      CC(1)=0.0;
-      CC(2)=0.0;
+
+      CC(:)=0.0_wp
       do q=LL,UU
         CC(1)=CC(1)+(EE(c1,q+N/2,1)+k3(q+N/2,1)/2)*(EE(c1,q-p(pp)+N/2,1)+k3(q-p(pp)+N/2,1)/2) + &
               (EE(c1,q+N/2,2)+k3(q+N/2,2)/2)*(EE(c1,q-p(pp)+N/2,2)+k3(q-p(pp)+N/2,2)/2);

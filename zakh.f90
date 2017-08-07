@@ -39,7 +39,7 @@ real(wp), parameter :: se_cte= 0.7397_wp / theta_se**3.0_wp
 
 !    Simulation parameters
 
-real(wp), parameter :: endTime=100e-6_wp !100.0e-3_wp ! simulation ends (seconds)
+real(wp), parameter :: endTime=1e-3_wp !100.0e-3_wp ! simulation ends (seconds)
 real(wp), parameter :: Tstep=0.5e-7_wp ! simulation time steps
 integer, parameter :: TT= floor(endTime / Tstep)              ! floor(endTime/Tstep)+2
 integer, parameter :: res=20

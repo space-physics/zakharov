@@ -3,7 +3,8 @@ language: cpp
 os:
   - linux
   - osx
-  
+
+dist: trusty  
 group: edge
 
 notifications:

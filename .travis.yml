@@ -18,6 +18,13 @@ addons:
     sources: ['ubuntu-toolchain-r-test']
     packages: ['g++','libboost-filesystem-dev','libboost-program-options-dev']
 
+before_install:
+  - if [[ $TRAVIS_OS_NAME == osx ]]; then
+      brew install gcc boost;
+    fi
+
+  - export FC=gfortran
+
 install: 
     - cd bin
     - cmake ..

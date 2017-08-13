@@ -17,8 +17,8 @@ target_link_libraries(zakh -lboost_system -lboost_filesystem -lboost_program_opt
 add_executable(zakhfort zakh.f90)
 if(${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
     target_compile_options(zakhfort PUBLIC 
-    -std=f2008
-    -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace -ffree-line-length-0 -fcheck=all -ffpe-trap=zero,overflow,underflow -finit-real=nan)
+    -std=f2008 -fall-intrinsics
+    -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace -ffree-line-length-0 -fcheck=all -ffpe-trap=invalid,zero,overflow -finit-real=nan)
 elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
     target_compile_options(zakhfort PUBLIC -check all -fpe0 -warn -traceback -debug extended)
 elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")  # FLANG

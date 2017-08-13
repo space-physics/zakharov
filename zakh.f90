@@ -39,11 +39,12 @@ real(wp), parameter :: se_cte= 0.7397_wp / theta_se**3.0_wp
 
 !    Simulation parameters
 
-real(wp), parameter :: endTime=1e-3_wp !100.0e-3_wp ! simulation ends (seconds)
+real(wp) :: endTime !100.0e-3_wp ! simulation ends (seconds)
 real(wp), parameter :: Tstep=0.5e-7_wp ! simulation time steps
-integer, parameter :: TT= floor(endTime / Tstep)              ! floor(endTime/Tstep)+2
+integer :: TT, TT_res               ! TT=floor(endTime/Tstep)+2
 integer, parameter :: res=20
-integer, parameter :: TT_res = floor(endTime/Tstep/res)  !floor(endTime/Tstep/res)
+!TT_res=floor(endTime/Tstep/res)
+
 real(wp), parameter :: L=70.0_wp           ! simulation box length (meter)j
 integer, parameter :: N=2046          ! number of samples in L should be devidable by 6
 real(wp), parameter :: Xstep= L / N
@@ -99,12 +100,18 @@ argc = command_argument_count()
 call get_command_argument(1,argv)
 odir = trim(argv)
 print *,'writing output to', odir
-call execute_command_line('mkdir -p '//odir)
+! call execute_command_line('mkdir -p '//odir)  ! FIXME temp disable for flang F2003 compat
+call system('mkdir -p '//odir)
 
-allocate(beamev(argc-1))
-do i = 2,argc
+call get_command_argument(2,argv)
+read(argv,*) endTime
+TT = floor(endTime / Tstep)
+TT_res = floor(endTime/Tstep/res)
+
+allocate(beamev(argc-2))
+do i = 3,argc
    call get_command_argument(i,argv)
-    read(argv,*) beamev(i-1)
+    read(argv,*) beamev(i-2)
 enddo
 
 Nnbeam = size(beamev)
@@ -486,7 +493,7 @@ print *,"Elapsed Time: ", toc-tic
 contains
 
 
-pure elemental subroutine Xsection(Xsec_ion, Xsec_pl, k)
+elemental subroutine Xsection(Xsec_ion, Xsec_pl, k)
   implicit none
 
   real(wp), intent(out) :: Xsec_ion, Xsec_pl

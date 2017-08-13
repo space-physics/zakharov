@@ -20,7 +20,7 @@ addons:
 
 before_install:
   - if [[ $TRAVIS_OS_NAME == osx ]]; then
-      brew install gcc boost;
+      brew install gcc;
     fi
 
   - export FC=gfortran

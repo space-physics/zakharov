@@ -37,7 +37,7 @@ Setup
     cmake ..
     make
 
-1-D ZakharovUsage
+1-D Zakharov Usage
 =================
 arguments are:  output_directory simulation_end_time electron_beam_env(as many beams as you like)::
 

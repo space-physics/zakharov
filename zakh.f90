@@ -23,7 +23,7 @@ real(wp), parameter :: nuic=1.0_wp ! ion collision freq
 real(wp), parameter :: nuec=100.0_wp ! electron collision freq
 real(wp), parameter :: n0=5.0e11_wp ! background density
 
-real(wp), parameter :: vbeam_ev(*) = [500.0_wp]
+real(wp), parameter :: vbeam_ev(1) = [500.0_wp]
 integer, parameter :: Nvbeam=size(vbeam_ev)
 real(wp) :: vbeam(Nvbeam), tetabeam(Nvbeam)
 
@@ -191,16 +191,21 @@ do beamj=1,Nvbeam
 
     end if
 
-    omegaL(ii)=sqrt(omegae**2.0_wp + 3*(k(ii)*ve)**2.0_wp)
-    gamas= -1.0_wp*sqrt(pi/8)*(sqrt(me/mi) + (Te/Ti)**2.0_wp/sqrt(Te/Ti)*exp(-1.0_wp*(Te/2.0/Ti)-1.5))*abs(k(ii))*Cs
-		!gamas= -1.0_wp*sqrt(pi/2)*(sqrt(me/mi)+4*pow(Te/2/Ti,2)/sqrt(Te/2/Ti)*exp(-1.0_wp*(Te*4/Ti)))*abs(k(ii))*Cs*10   //based on Robinson 2002
-		!gamas= -1.0_wp*sqrt(pi/8)*pow(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te,2)/sqrt(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp(-1.0_wp*(Te/2.0/Ti)/(1+k(ii)*k(ii)*lambdaD*lambdaD)-1.5))*abs(k(ii))*Cs   //Based on some Chinese paper!!
+    omegaL(ii)=sqrt(omegae**2.0_wp + 3.0_wp*(k(ii)*ve)**2.0_wp)
+    gamas= -1.0_wp*sqrt(pi/8)*(sqrt(me/mi) + (Te/Ti)**2.0_wp / sqrt(Te/Ti) * &
+            exp(-1.0_wp*(Te/2.0_wp/Ti)-1.5_wp))*abs(k(ii))*Cs
+		!gamas= -1.0_wp*sqrt(pi/2)*(sqrt(me/mi) + 4*(Te/2/Ti)**2 / sqrt(Te/2/Ti) * &
+!            exp(-1.0_wp*(Te*4/Ti)))*abs(k(ii))*Cs*10   ! based on Robinson 2002
+		!gamas= -1.0_wp*sqrt(pi/8)*(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te)**2 / &
+!              sqrt(1/(1+k(ii)*k(ii)*lambdaD*lambdaD)+3*Ti/Te)*(sqrt(me/mi)+(Te/Ti)**2 / &
+!               sqrt(Te/Ti)*exp(-1.0_wp*(Te/2.0_wp/Ti)/(1+k(ii)*k(ii)*lambdaD*lambdaD)-1.5_wp)) * &
+!               abs(k(ii))*Cs   ! Based on some Chinese paper!!
     nui(ii)=(nuic/2-gamas)
 
     if (ii==N/2) then
       gamal=0.0_wp           ! this one is Nan due to division by zero
       gamal1=0.0_wp
-      nue(ii)=nuec/2-gamal1
+      nue(ii)=nuec/2.0_wp-gamal1
       Source_factor_n(ii)=0.0_wp
       Source_factor_E(ii)=0.0_wp
     else
@@ -210,9 +215,11 @@ do beamj=1,Nvbeam
       gamal2=-1.0_wp*sqrt(pi/8)* (omegae / k(ii) / tetabeam(beamj))**2.0_wp * sign(1.0_wp,k(ii)) * nbeam(beami) / &
               n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam(beamj)) / (k(ii)*tetabeam(beamj)) * &
               exp(-1.0_wp* (omegaL(ii)-k(ii)*vbeam(beamj) / k(ii) / tetabeam(beamj))**2.0_wp/2) !Landau damping due to the beam
-!gamal2=-1.0_wp*sqrt(pi/8)*pow(omegae/k(ii)/tetabeam.at(beamj),2)* sign(1,k(ii)) *nbeam.at(beami)/n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam.at(beamj))/(k(ii)*tetabeam.at(beamj))*exp(-1.0_wp*pow((omegaL(ii)-k(ii)*vbeam.at(beamj))/k(ii)/tetabeam.at(beamj),2)/2)  //Landau damping due to the beam
+      !gamal2=-1.0_wp*sqrt(pi/8)*(omegae/k(ii)/tetabeam(beamj))**2 * sign(1.0_wp,k(ii)) * &
+!             nbeam(beami)/n0*omegaL(ii)*(omegaL(ii)-k(ii)*vbeam(beamj))/(k(ii)*tetabeam(beamj))* &
+!             exp(-1.0_wp*((omegaL(ii)-k(ii)*vbeam(beamj))/k(ii)/tetabeam(beamj))**2/2)  ! Landau damping due to the beam
       gamal3=-1.0_wp*sqrt(pi)* (omegae*omegaL(ii))**2.0_wp / k(ii)**3.0_wp * sign(1.0_wp,k(ii)) *se_cte * &
-              (1+ omegaL(ii)**2.0_wp/kappa/ (k(ii)*theta_se)**2.0_wp)**(-1.0_wp*(kappa+1))
+              (1.0_wp + omegaL(ii)**2.0_wp/kappa/ (k(ii)*theta_se)**2.0_wp)**(-1.0_wp*(kappa+1))
 
       gamal=gamal1*(1-se_percent)+gamal2+se_percent*gamal3 ! here decide to include the beam and Kappa distribution
       nue(ii) = nuec/2-gamal1
@@ -271,13 +278,13 @@ do beamj=1,Nvbeam
 
     do iij1=1,3
       call random_number(rdist)
-      EE (iij1,:,1)=sqrt(output1(:,5)/2.0)*rdist
+      EE (iij1,:,1)=sqrt(output1(:,5)/2.0_wp)*rdist
       call random_number(rdist)
-      EE (iij1,:,2)=sqrt(output1(:,5)/2.0)*rdist
+      EE (iij1,:,2)=sqrt(output1(:,5)/2.0_wp)*rdist
       call random_number(rdist)
-      nn (iij1,:,1)=sqrt(output1(:,6)/2.0)*rdist
+      nn (iij1,:,1)=sqrt(output1(:,6)/2.0_wp)*rdist
       call random_number(rdist)
-      nn (iij1,:,2)=sqrt(output1(:,6)/2.0)*rdist
+      nn (iij1,:,2)=sqrt(output1(:,6)/2.0_wp)*rdist
     end do ! iij1 4
 
   !  print *,EE(3,3,2)
@@ -312,8 +319,8 @@ do beamj=1,Nvbeam
         call random_number(rdist(:2))
         SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
 
-        cte1=1.5*omegae*(lambdaD*k(pp))**2.0_wp
-  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
+        cte1=1.5_wp*omegae*(lambdaD*k(pp))**2.0_wp
+  			!cte1=1.5_wp*Kb*Te/me/omega_off*k(pp)*k(pp)-(omega_off**2-omegae**2)/2.0_wp/omega_off
         k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
         k1(pp,2)=Tstep*(-1.0_wp*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
       end do ! pp N
@@ -329,12 +336,12 @@ do beamj=1,Nvbeam
           CC(2)=CC(2)+(EE(c1,q+N/2,1)+k1(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k1(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1)
         end do
 
-        cte1=1.5*omegae*(lambdaD*k(pp))**2.0_wp
-  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
-        k2(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
-                  nuE(pp) * (EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
-        k2(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k1(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
-                  nuE(pp)*(EE(c1,pp,2)+k1(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1))
+        cte1=1.5_wp*omegae*(lambdaD*k(pp))**2.0_wp
+  			!cte1=1.5_wp*Kb*Te/me/omega_off*k(pp)*k(pp)-(omega_off**2-omegae**2)/2.0_wp/omega_off
+        k2(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k1(pp,2)/2.0_wp-SSE(pp,1)/2.0_wp*Tstep) - &
+                  nuE(pp) * (EE(c1,pp,1)+k1(pp,1)/2.0_wp+SSE(pp,2)/2.0_wp*Tstep)+cte2*CC(2))
+        k2(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k1(pp,1)/2.0_wp+SSE(pp,2)/2.0_wp*Tstep) - &
+                  nuE(pp)*(EE(c1,pp,2)+k1(pp,2)/2.0_wp-SSE(pp,1)/2.0_wp*Tstep)-cte2*CC(1))
 
       end do ! pp N
 
@@ -349,12 +356,12 @@ do beamj=1,Nvbeam
           CC(2)=CC(2)+(EE(c1,q+N/2,1)+k2(q+N/2,1)/2)*nn(c1,p(pp)-q+N/2,2)+(EE(c1,q+N/2,2)+k2(q+N/2,2)/2)*nn(c1,p(pp)-q+N/2,1)
         end do
 
-        cte1=1.5*omegae*(lambdaD*k(pp))**2.0_wp
-  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
-        k3(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep) - &
-                nuE(pp)*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep)+cte2*CC(2))
-        k3(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k2(pp,1)/2.0+SSE(pp,2)/2.0*Tstep) - &
-                nuE(pp)*(EE(c1,pp,2)+k2(pp,2)/2.0-SSE(pp,1)/2.0*Tstep)-cte2*CC(1))
+        cte1=1.5_wp*omegae*(lambdaD*k(pp))**2.0_wp
+  			!cte1=1.5_wp*Kb*Te/me/omega_off*k(pp)*k(pp)-(omega_off**2-omegae**2)/2.0_wp/omega_off
+        k3(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k2(pp,2)/2.0_wp-SSE(pp,1)/2.0_wp*Tstep) - &
+                nuE(pp)*(EE(c1,pp,1)+k2(pp,1)/2.0_wp+SSE(pp,2)/2.0_wp*Tstep)+cte2*CC(2))
+        k3(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k2(pp,1)/2.0_wp+SSE(pp,2)/2.0_wp*Tstep) - &
+                nuE(pp)*(EE(c1,pp,2)+k2(pp,2)/2.0_wp-SSE(pp,1)/2.0_wp*Tstep)-cte2*CC(1))
 
       end do ! pp N
 
@@ -371,14 +378,14 @@ do beamj=1,Nvbeam
         end do
 
 
-        cte1=1.5*omegae*(lambdaD*k(pp))**2.0_wp
-  			!cte1=1.5*Kb*Te/me/omega_off*k(pp)*k(pp)-(pow(omega_off,2)-pow(omegae,2))/2.0/omega_off
+        cte1=1.5_wp*omegae*(lambdaD*k(pp))**2.0_wp
+  			!cte1=1.5_wp*Kb*Te/me/omega_off*k(pp)*k(pp)-(omega_off**2-omegae**2)/2.0_wp/omega_off
         k4(pp,1)=Tstep*(cte1*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-nuE(pp)*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep)+cte2*CC(2))
         k4(pp,2)=Tstep*(-1.0_wp*cte1*(EE(c1,pp,1)+k3(pp,1)+SSE(pp,2)*Tstep) - &
             nuE(pp)*(EE(c1,pp,2)+k3(pp,2)-SSE(pp,1)*Tstep)-cte2*CC(1))
 
-        EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0*k2(pp,1)+2.0*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2) * Tstep ! no vect
-        EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0*k2(pp,2)+2.0*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1) * Tstep ! no vect
+        EE(c2,pp,1)=EE(c1,pp,1)+(k1(pp,1)+2.0_wp*k2(pp,1)+2.0_wp*k3(pp,1)+k4(pp,1))/6.0+SSE(pp,2) * Tstep ! no vect
+        EE(c2,pp,2)=EE(c1,pp,2)+(k1(pp,2)+2.0_wp*k2(pp,2)+2.0_wp*k3(pp,2)+k4(pp,2))/6.0-SSE(pp,1) * Tstep ! no vect
         EE(c2,N/2,:)=0.0_wp
       end do ! pp N
 

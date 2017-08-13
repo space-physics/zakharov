@@ -15,4 +15,12 @@ add_executable(zakh zakh.cpp)
 target_link_libraries(zakh -lboost_system -lboost_filesystem -lboost_program_options)
 
 add_executable(zakhfort zakh.f90)
-target_compile_options(zakhfort PUBLIC -fcheck=all)
+if(${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+    target_compile_options(zakhfort PUBLIC 
+    -std=f2008
+    -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace -ffree-line-length-0 -fcheck=all -ffpe-trap=zero,overflow,underflow -finit-real=nan)
+elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
+    target_compile_options(zakhfort PUBLIC -check all -fpe0 -warn -traceback -debug extended)
+elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")  # FLANG
+    target_compile_options(zakhfort PUBLIC -Mallocatable=03)
+endif()

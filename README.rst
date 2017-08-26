@@ -11,20 +11,22 @@ Zakharov Simulation
 
 Originally authored by Hassanali Akbari as part of his PhD work.
 
-:author: Hassanali Akbari, Michael Hirsch
+Michael Hirsch converted to Fortran 2008, and should work with `gfortran`, `ifort`, `flang` and other Fortran compilers on any operating system and computer.
+
+:author: Hassanali Akbari, Michael Hirsch, Ph.D.
 
 .. contents::
 
 Prereq
 ======
 
-Linux / BSD / Windows::
+Linux / BSD / Windows Subsystem for Linux::
 
-    sudo apt-get install g++ cmake libboost-filesystem-dev libboost-program-options-dev
+    apt install g++ cmake libboost-filesystem-dev libboost-program-options-dev
     
 Mac::
 
-    brew install boost
+    brew install gcc boost
 
 
 Setup
@@ -35,11 +37,20 @@ Setup
     cmake ..
     make
 
-Usage
-=====
-::
+1-D Zakharov Usage
+=================
+arguments are:  output_directory simulation_end_time electron_beam_env(as many beams as you like)::
 
-    ./zahk
+    ./zakhfort /tmp/testfort 100e-3 300
+
+
     
+
+C++ usage
+=========
+Recommend using Fortran version instead::
+
+    ./zakh --ev 300 -o /tmp/testcxx
+
 --ev    beam energy
 -o      output directory (will be created if it doesn't exist)

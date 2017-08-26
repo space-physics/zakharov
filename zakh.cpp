@@ -5,13 +5,16 @@
 //Michael Hirsch Oct 2013 -- updated vbeam,tetabeam to use C++ vector format
 
 #include <boost/filesystem.hpp>
-#include "boost/program_options.hpp" 
+#include "boost/program_options.hpp"
 #include <iostream>
+#include <fstream>
 #include <vector>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <random>
 #include <ctime>
+#include <chrono>
 #include <fstream>
 #include <cmath>
 
@@ -50,7 +53,7 @@ double se_cte= 0.7397/pow(theta_se,3);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////    Simulation parameters
 
-const double endTime=100.0e-3;    // simulation ends (seconds)
+const double endTime=100.0e-6;    // simulation ends (seconds)
 const double Tstep=0.5e-7;     // simulation time steps
 double TT=endTime/Tstep;              //floor(endTime/Tstep)+2;
 const int res=20;
@@ -82,50 +85,50 @@ int main(int argc, char ** argv)
 
 
 // argparse
-    namespace po = boost::program_options; 
-    po::options_description desc("Options"); 
-    desc.add_options() 
+    namespace po = boost::program_options;
+    po::options_description desc("Options");
+    desc.add_options()
       ("help,h", "Print help messages")
       ("outdir,o",po::value<std::string>(&odir)->required(), "Output directory")
       ("ev",po::value<std::vector<double> >()->multitoken()->required(),"list of beam energies [eV]"); //semicolon after last option
- 
-    po::variables_map vm; 
-    try 
-    { 
-      po::store(po::parse_command_line(argc, argv, desc),  
-                vm); // can throw 
- 
-      /** --help option 
-       */ 
-      if ( vm.count("help")  ) 
-      { 
-        std::cout << "Basic Command Line Parameter App" << std::endl 
-                  << desc << std::endl; 
-        return EXIT_SUCCESS; 
-      } 
- 
-      po::notify(vm); // throws on error, so do after help in case 
-                      // there are any problems 
+
+    po::variables_map vm;
+    try
+    {
+      po::store(po::parse_command_line(argc, argv, desc),
+                vm); // can throw
+
+      /** --help option
+       */
+      if ( vm.count("help")  )
+      {
+        std::cout << "Basic Command Line Parameter App" << std::endl
+                  << desc << std::endl;
+        return EXIT_SUCCESS;
+      }
+
+      po::notify(vm); // throws on error, so do after help in case
+                      // there are any problems
 
 
-    } 
-    catch(po::error& e) 
-    { 
-      std::cerr << "ERROR: " << e.what() << std::endl; 
-      std::cerr << desc << std::endl; 
-      return EXIT_FAILURE; 
-    } 
+    }
+    catch(po::error& e)
+    {
+      std::cerr << "ERROR: " << e.what() << std::endl;
+      std::cerr << desc << std::endl;
+      return EXIT_FAILURE;
+    }
 
 
 // store variables
     std::vector<double> beamev = vm["ev"].as<std::vector<double> >();
-    int Nnbeam=beamev.size(); 
+    int Nnbeam=beamev.size();
 
     std::vector<double> nbeam(Nnbeam);
 
     for (int i=0; i<Nnbeam; i++)
         nbeam[i] = beamev[i]*n0;
-    
+
 
 //-------------------------------------------------------------------------------------
 // create output directory if it doesn't exist
@@ -138,18 +141,15 @@ int main(int argc, char ** argv)
             std::cout << "created output directory " << outDir << std::endl;
     }
     else{
-        std::cout << "using output directory " << outDir << std::endl;
+        std::cout << "using existing output directory " << outDir << std::endl;
     }
 //-------------------------------------------------------------------------------------
     printf("Nnbeam=%i \n",Nnbeam);
 	printf("Nvbeam=%i \n",Nvbeam);
 	printf("TT=%0.1f time steps \n",TT);
 
-	time_t now;
-	struct tm *current;
-	now = time(0);
-	current = localtime(&now);
-	int StartTime[3]={current->tm_hour, current->tm_min, current->tm_sec};
+std::chrono::time_point<std::chrono::system_clock> tic,toc;
+tic = std::chrono::system_clock::now();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////   initialization
 
@@ -171,8 +171,7 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 
 	int p[N];
 	double k[N];
-	double Xsection_ion=0.0;
-	double Xsection_pl=0.0;
+	double Xsection_ion, Xsection_pl;
 	double E_thermal_k_squared;
 	double n_thermal_k_squared;
 	double Source_factor_E[N];
@@ -185,8 +184,8 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	double gamal3;
 	double gamal;
 	double nue[N];
-	double parameters[32];
-	double output1[N][12];
+std::vector<double> parameters(32);
+std::vector<std::vector<double> > output1(N, std::vector<double> (12));
 
 	parameters[0]=pi;
 	parameters[1]=me;
@@ -214,38 +213,42 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	parameters[23]=N;
 	parameters[24]=Xstep;
 	parameters[25]=QW;
-	parameters[26]=SEED;
-	parameters[27]=eta;
-	parameters[28]=ve;
-	parameters[29]=Cs;
-	parameters[30]=omegae;
-	parameters[31]=lambdaD;
+	parameters[26]=eta;
+	parameters[27]=ve;
+	parameters[28]=Cs;
+	parameters[29]=omegae;
+	parameters[30]=lambdaD;
+  parameters[31]=SEED;
 	//have to include other parameters regarding the Kappa distribution
-	
-	std::string fn = outDir + "parameters_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
-	const char* fnp = fn.c_str();
-	FILE* parameters_out;
-	parameters_out = fopen(fnp, "wb");
-	int bout=fwrite(parameters, 1, sizeof(parameters), parameters_out);
-	fclose(parameters_out);
-	std::cout << "Wrote " << bout << " bytes to " << fn << std::endl;
+
+  char fnp[256];
+	std::sprintf(fnp, "%sparameters_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
+  {
+	std::ofstream FILE(fnp, std::ios::out | std::ios::binary);
+  FILE.write(reinterpret_cast<char*>(&parameters[0]), parameters.size()*sizeof(double));
+	FILE.close();
+  }
+	std::cout << "Wrote " << fnp << std::endl;
 
 	for (int ii=0;ii<N;ii++){
 		p[ii]=ii-N/2;
 		if (ii==N/2){
 			k[ii]=0;
-			Xsection_ion=0;
-			Xsection_pl=0;
+			Xsection_ion=0.;
+			Xsection_pl=0.;
 			n_thermal_k_squared=0.0;
 			E_thermal_k_squared=0.0;
 		}
 		else{
 		k[ii]=2*pi*p[ii]/N/Xstep;
+
 		Xsection(Xsection_ion,Xsection_pl,k[ii]);
 		Xsection_ion=Xsection_ion/N/N;
 		Xsection_pl=Xsection_pl/N/N;
+
 		n_thermal_k_squared=Xsection_ion*n0;
 		E_thermal_k_squared=Xsection_pl *n0*pow(electroncharge/epsilon0/k[ii],2);
+
 		}
 		omegaL[ii]=sqrt(pow(omegae,2)+3*pow(k[ii]*ve,2));
 		gamas= (-1)*sqrt(pi/8)*(sqrt(me/mi)+pow(Te/Ti,2)/sqrt(Te/Ti)*exp((-1)*(Te/2.0/Ti)-1.5))*std::fabs(k[ii])*Cs;
@@ -285,16 +288,36 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 		output1[ii][11]=Source_factor_n[ii];
 	}
 
-	fn = outDir + "output1_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
-	const char* fno = fn.c_str();
-	FILE* output1_out;
-	output1_out = fopen(fno, "wb");
-	bout = fwrite(output1, 1, sizeof(output1), output1_out);
-	fclose(output1_out);
-	std::cout << "Wrote " << bout << " bytes to " << fn << std::endl;
+//  for (int i=0; i<12;i++){
+//    std::cout << output1[1][i] << std::endl;
+//    }
 
 
-	static double EE [3][N][2];
+  char fno[256];
+	std::sprintf(fno,"%soutput1_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
+  {
+  std::ofstream FILE(fno, std::ios::out | std::ios::binary);
+
+  int s = output1.size();
+  FILE.write(reinterpret_cast<const char *>(&s), sizeof(s));
+//https://stackoverflow.com/questions/43230542/write-vectorvectorfloat-to-binary-file
+   // Now write each vector one by one
+   for (auto& v : output1) {
+       // Store its size
+      // int size = v.size();
+      // FILE.write(reinterpret_cast<const char *>(&size), sizeof(size));
+
+       // Store its contents
+       FILE.write(reinterpret_cast<const char *>(&v[0]), v.size()*sizeof(double));
+    }
+  FILE.close();
+  }
+	std::cout << "Wrote " << fno << std::endl;
+
+
+  //std::array<std::array<std::array<double, 3>, N>, 2> EE;
+//  std::vector<std::vector<std::vector<double> > > EE (3,vector<vector<double> >(N,vector <double>(2)));
+  double EE[3][N][2];
 	static double nn [3][N][2];
 	static double vv [3][N][2];
 	int LL,UU,pp;
@@ -305,9 +328,6 @@ for (int beamj=0;beamj<Nvbeam;beamj++){
 	double cte2=omegae/2.0/n0/1;
 	double k1[N][2],k2[N][2],k3[N][2],k4[N][2];
 	double kn1[2], kn2[2], kn3[2], kn4[2], kv1[2], kv2[2], kv3[2], kv4[2];
-	static double total_EE[20000*N*2];
-	static double total_nn[20000*N*2];
-
 
 for (int realization=0;realization<QW;realization++){
 
@@ -316,15 +336,15 @@ for (int realization=0;realization<QW;realization++){
 	std::default_random_engine generator (aabb);
 	std::normal_distribution<long double> distribution (0.0,1.0);
 
-	fn = outDir + "EE" + std::to_string(SEED+realization) + "_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
-    const char* nameE = fn.c_str();
-	FILE* EE_out;
-	EE_out = fopen(nameE, "wb");
-	
-	fn = outDir + "nn" + std::to_string(SEED+realization) + "_n" + std::to_string(beami) + "_v" + std::to_string(beamj);
-    const char* namen = fn.c_str();
-	FILE* nn_out;
-	nn_out = fopen(namen, "wb");
+  char nameE[256];
+	std::sprintf(nameE,"%sEE%03d%03d_n%03d_v%03d.bin",outDir.c_str(),SEED,realization+1,beami+1,beamj+1);
+	std::ofstream EE_out;
+	EE_out.open(nameE, std::ios::out | std::ios::binary);
+
+  char namen[256];
+	std::sprintf(namen,"%snn%03d%03d_n%03d_v%03d.bin",outDir.c_str(),SEED,realization+1,beami+1,beamj+1);
+	std::ofstream nn_out;
+	nn_out.open(namen, std::ios::out | std::ios::binary);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////   main loops
 
@@ -349,7 +369,10 @@ for (int realization=0;realization<QW;realization++){
 
     }
 
-	int counter1=0;
+  //  for(const auto& s: EE)
+    //    std::cout << s << ' ';
+
+
 	for (int tt1=1;tt1<=TT;tt1++){
 
 //		int c0=(tt1-1) % 3;
@@ -359,7 +382,7 @@ for (int realization=0;realization<QW;realization++){
 
 					//update display every 50th iteration
 		if (tt1 % 50 == 0){
-		printf("Realization: %i ,  %0.2f%% complete_n%d_v%d \n",realization+1, tt1*100.0/TT,  beami, beamj);
+		printf("Realization: %03i ,  %0.2f%% complete n%03d v%03d \n",realization+1, tt1*100.0/TT,  beami, beamj);
                 }
 
 			for (pp=0;pp<N;pp++){
@@ -529,43 +552,36 @@ for (int realization=0;realization<QW;realization++){
 				}
 
 			}
+// main file output
+      double obufEE[2];
+      double obufnn[2];
 
 			if ( (tt1)%res == 1){
 				for (pp=0;pp<N;pp++){
-					total_EE[counter1*N*2+pp*2+0]=EE[c2][pp][0];
-					total_EE[counter1*N*2+pp*2+1]=EE[c2][pp][1];
-					total_nn[counter1*N*2+pp*2+0]=nn[c2][pp][0];
-					total_nn[counter1*N*2+pp*2+1]=nn[c2][pp][1];
+					obufEE[0]=EE[c2][pp][0];
+					obufEE[1]=EE[c2][pp][1];
+					obufnn[0]=nn[c2][pp][0];
+					obufnn[1]=nn[c2][pp][1];
+
+          EE_out.write(reinterpret_cast<char *> (&obufEE), sizeof(obufEE));
+          nn_out.write(reinterpret_cast<char *> (&obufnn), sizeof(obufnn));
 				}
-				counter1++;
-			}
-
-			if (counter1==20000){
-				fwrite(total_EE, 1, sizeof(total_EE), EE_out);
-				fwrite(total_nn, 1, sizeof(total_nn), nn_out);
-				counter1=0;
-			}
-
-		}
-
-	if (counter1>0){
-		fwrite(total_EE, 1, sizeof(double)*counter1*N*2, EE_out);
-		fwrite(total_nn, 1, sizeof(double)*counter1*N*2, nn_out);
-	}
-
-
-	fclose(EE_out);
-	fclose(nn_out);
-}//relizations
+			} // if tt1%res==1
+		} // tt1
+	EE_out.close();
+	nn_out.close();
+}//realizations
 }//Nvbeam
 }//Nnbeam
 
 
-	now = time(0);
-	current = localtime(&now);
-	int EndTime[3]={current->tm_hour, current->tm_min, current->tm_sec};
-	printf("Elapsed Time: %i:%i:%i\n", EndTime[0]-StartTime[0], EndTime[1]-StartTime[1], EndTime[2]-StartTime[2]);
+  toc = std::chrono::system_clock::now();
 
+  std::chrono::duration<double> elapsed_seconds = toc-tic;
+  std::time_t stoptime = std::chrono::system_clock::to_time_t(toc);
+
+  std::cout << "finished computation at " << std::ctime(&stoptime)
+            << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
 	return EXIT_SUCCESS;
 }
@@ -580,6 +596,7 @@ void Xsection(double& Xsec_ion, double& Xsec_pl,double k){
 	Xsec_ion=2*pi/(1+pow(alpha,2))*(Z*pow(alpha,4)/(1+pow(alpha,2)+pow(alpha,2)*(Z*Te/Ti)));
 	double XX=2*pi*(1+pow(alpha,2)*Z*Te/Ti)/(1+pow(alpha,2)+pow(alpha,2)*(Z*Te/Ti));
 	Xsec_pl=XX-Te/Ti*Xsec_ion;
+
+  //std::cout << k <<" " << alpha << " "<< Xsec_ion << " " << XX << " " << Xsec_pl << std::endl;
+
 }
-
-

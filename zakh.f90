@@ -6,9 +6,12 @@
 
 program zakharov1d
 
-use, intrinsic:: iso_fortran_env, only: wp=>real64
+use, intrinsic:: iso_fortran_env, only: wp=>real64, i64=>int64
+use perf, only: sysclock2ms
 
 implicit none
+
+integer(i64) :: tic, toc
 
 real(wp), parameter :: pi = 4.0_wp * atan(1.0_wp)
 
@@ -67,7 +70,7 @@ integer :: Nnbeam
 character(:), allocatable :: odir, ofn
 character(256) :: argv
 integer :: argc,i, ii,iij1, q,tt1,c1,c2,beami, beamj, realization,u,uEE,uNN
-real(wp) :: tic,toc
+real(wp) :: tic1,toc1
 
 !---- main loop variables
 
@@ -122,7 +125,7 @@ print *, "Nnbeam=", Nnbeam
 print *, "Nvbeam=",Nvbeam
 print *,"TT=",TT,"time steps"
 
-call cpu_time(tic)
+call cpu_time(tic1)
 
 ! initialization
 
@@ -312,25 +315,7 @@ do beamj=1,Nvbeam
       if (mod(tt1,50) == 0) print '(A,I0.3,F7.2,A,I0.3,A,I0.3)',"Realization: ",&
           realization,tt1*100.0/TT,"% complete.  n",beami," v",beamj
 
-      do pp=1,N
-
-        LL = max(p(pp)-N/3,-N/3)
-        UU = min(N/3,p(pp)+N/3)
-        CC(:)=0.0_wp
-
-        do q=LL,UU
-          CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
-          CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1)
-        end do
-
-        call random_number(rdist(:2))
-        SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
-
-        cte1=1.5_wp*omegae*(lambdaD*k(pp))**2.0_wp
-  			!cte1=1.5_wp*Kb*Te/me/omega_off*k(pp)*k(pp)-(omega_off**2-omegae**2)/2.0_wp/omega_off
-        k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
-        k1(pp,2)=Tstep*(-1.0_wp*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
-      end do ! pp N
+      call calc_k1(N,nn,k1,SSE)
 
 
       do pp=1,N
@@ -486,11 +471,53 @@ end do !Nvbeam
 end do !Nnbeam
 
 
-call cpu_time(toc)
-print *,"Elapsed Time: ", toc-tic
+call cpu_time(toc1)
+print *,"Elapsed Time: ", toc1-tic1
 
 
 contains
+
+
+subroutine calc_k1(N,nn,k1,SSE)
+
+  integer :: pp, im, Nimg
+  integer, intent(in) :: N
+  real(wp), intent(in) :: nn(3,N,2)
+  real(wp),intent(out) :: k1(N,2), SSE(N,2)
+  real(wp) :: CC(2)[*] = 0.0_wp
+  
+  integer(i64) :: tic, toc
+
+  im = this_image()
+  Nimg = num_images()
+
+  do pp=1,N
+
+    LL = max(p(pp)-N/3,-N/3)
+    UU = min(N/3,p(pp)+N/3)
+    CC(:)=0.0_wp
+
+    !call system_clock(tic)
+    do q = im+(LL-1),UU, Nimg ! LL,UU
+      CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
+      CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1)
+    end do
+    !call system_clock(toc)
+    !print *,sysclock2ms(toc-tic)
+
+    call co_sum(CC)
+
+    call random_number(rdist(:2))
+    SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
+
+    cte1=1.5_wp*omegae*(lambdaD*k(pp))**2.0_wp
+		!cte1=1.5_wp*Kb*Te/me/omega_off*k(pp)*k(pp)-(omega_off**2-omegae**2)/2.0_wp/omega_off
+    k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
+    k1(pp,2)=Tstep*(-1.0_wp*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
+  end do ! pp N
+
+
+end subroutine calc_k1
 
 
 elemental subroutine Xsection(Xsec_ion, Xsec_pl, k)

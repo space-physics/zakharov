@@ -13,44 +13,65 @@ Originally authored by Hassanali Akbari as part of his PhD work.
 
 Michael Hirsch converted to Fortran 2008, and should work with `gfortran`, `ifort`, `flang` and other Fortran compilers on any operating system and computer.
 
+
 :author: Hassanali Akbari, Michael Hirsch, Ph.D.
+
+The procedure to use this program is as follows:
+
+1. Build the Fortran code
+2. run the simulation
+3. plot with Matlab
 
 .. contents::
 
-Prereq
-======
 
-Linux / BSD / Windows Subsystem for Linux::
+Build
+=====
+
+
+
+Prereqs
+-------
+
+Linux
+~~~~~
+::
 
     apt install g++ cmake libboost-filesystem-dev libboost-program-options-dev
     
-Mac::
+Mac
+~~~
+::
 
     brew install gcc boost
 
 
-Setup
-=====
+Compile
+-------
 ::
 
     cd bin
     cmake ..
     make
 
-1-D Zakharov Usage
-=================
+Run Simulation
+==============
 arguments are:  output_directory simulation_end_time electron_beam_env(as many beams as you like)::
 
     ./zakhfort /tmp/testfort 100e-3 300
 
 
-    
-
 C++ usage
-=========
+---------
 Recommend using Fortran version instead::
 
     ./zakh --ev 300 -o /tmp/testcxx
 
 --ev    beam energy
 -o      output directory (will be created if it doesn't exist)
+
+Plot Results
+============
+From GNU Octave or Matlab::
+
+    Sim_v6_3_Linux(0,output-directory)

@@ -62,7 +62,7 @@ Run Simulation
 ==============
 arguments are:  output_directory simulation_end_time electron_beam_env(as many beams as you like)::
 
-    ./zakhfort /tmp/testfort 100e-3 300
+    ./zakhfort /tmp/test 1e-4 300
 
 
 C++ usage
@@ -78,4 +78,4 @@ Plot Results
 ============
 From GNU Octave or Matlab::
 
-    Sim_v6_3_Linux(0,/tmp/testfort)
+    Sim_v6_3_Linux(0, /tmp/test)

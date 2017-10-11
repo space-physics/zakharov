@@ -1,0 +1,11 @@
+
+platform: mingw
+
+clone_depth: 3
+
+
+build_script:
+
+  - cd bin
+  - cmake .. -G "MinGW Makefiles" 
+  - make

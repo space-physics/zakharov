@@ -78,4 +78,4 @@ Plot Results
 ============
 From GNU Octave or Matlab::
 
-    Sim_v6_3_Linux(0,output-directory)
+    Sim_v6_3_Linux(0,/tmp/testfort)

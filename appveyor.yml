@@ -1,11 +1,7 @@
 environment:
-  PYTHON_VERSION: 3.6
   CC:  C:\msys64\mingw64\bin\gcc.exe
   CXX: C:\msys64\mingw64\bin\g++.exe
   FC:  C:\msys64\mingw64\bin\gfortran.exe
-
-platform:
-  - x64
 
 clone_depth: 3
 

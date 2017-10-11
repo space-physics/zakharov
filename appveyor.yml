@@ -1,3 +1,5 @@
+os: Windows Server 2016
+
 environment:
   PYTHON_VERSION: 3.6
   FC: C:\MinGW\bin\gfortran.exe
@@ -11,6 +13,7 @@ init:
   - set ORIGPATH=%PATH%
 
 build_script:
+  - dir C:\msys64\mingw64\bin
   - dir C:\MinGW\bin
   - cd bin
   

@@ -39,6 +39,10 @@ Linux
 
     apt install g++ cmake libboost-filesystem-dev libboost-program-options-dev
     
+For `coarray` branch, additionally::
+
+    apt install libcoarrays-dev
+    
 Mac
 ~~~
 ::

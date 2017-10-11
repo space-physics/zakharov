@@ -16,7 +16,7 @@ git:
 addons:
   apt:
     sources: ['ubuntu-toolchain-r-test']
-    packages: ['gfortran','libboost-filesystem-dev','libboost-program-options-dev']
+    packages: ['gfortran-6','libboost-filesystem-dev','libboost-program-options-dev']
 
 before_install:
   - if [[ $TRAVIS_OS_NAME == osx ]]; then

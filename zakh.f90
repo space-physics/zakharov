@@ -480,41 +480,33 @@ contains
 
 subroutine calc_k1(N,nn,k1,SSE)
 
-  integer :: pp, im, Nimg
-  integer, intent(in) :: N
-  real(wp), intent(in) :: nn(3,N,2)
-  real(wp),intent(out) :: k1(N,2), SSE(N,2)
-  real(wp) :: CC(2)[*] = 0.0_wp
-  
-  integer(i64) :: tic, toc
+integer :: pp
+integer, intent(in) :: N
+real(wp), intent(in) :: nn(3,N,2)
+real(wp),intent(out) :: k1(N,2), SSE(N,2)
+real(wp) :: CC(2) = 0.0_wp
 
-  im = this_image()
-  Nimg = num_images()
+!integer(i64) :: tic, toc
 
-  do pp=1,N
+do pp=1,N
 
-    LL = max(p(pp)-N/3,-N/3)
-    UU = min(N/3,p(pp)+N/3)
-    CC(:)=0.0_wp
+  LL = max(p(pp)-N/3,-N/3)
+  UU = min(N/3,p(pp)+N/3)
+  CC(:)=0.0_wp
 
-    !call system_clock(tic)
-    do q = im+(LL-1),UU, Nimg ! LL,UU
-      CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
-      CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1)
-    end do
-    !call system_clock(toc)
-    !print *,sysclock2ms(toc-tic)
+  do q=LL,UU
+    CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
+    CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1)
+  end do
 
-    call co_sum(CC)
+  call random_number(rdist(:2))
+  SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
 
-    call random_number(rdist(:2))
-    SSE(pp,:) = rdist(:2)*Source_factor_E(pp)/sqrt(Tstep)
-
-    cte1=1.5_wp*omegae*(lambdaD*k(pp))**2.0_wp
-		!cte1=1.5_wp*Kb*Te/me/omega_off*k(pp)*k(pp)-(omega_off**2-omegae**2)/2.0_wp/omega_off
-    k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
-    k1(pp,2)=Tstep*(-1.0_wp*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
-  end do ! pp N
+  cte1=1.5_wp*omegae*(lambdaD*k(pp))**2.0_wp
+	!cte1=1.5_wp*Kb*Te/me/omega_off*k(pp)*k(pp)-(omega_off**2-omegae**2)/2.0_wp/omega_off
+  k1(pp,1)=Tstep*(cte1*EE(c1,pp,2)-nuE(pp)*EE(c1,pp,1)+cte2*CC(2))
+  k1(pp,2)=Tstep*(-1.0_wp*cte1*EE(c1,pp,1)-nuE(pp)*EE(c1,pp,2)-cte2*CC(1))
+end do ! pp N
 
 
 end subroutine calc_k1

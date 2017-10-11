@@ -41,7 +41,7 @@ endif()
 
 
 elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
-  target_compile_options(zakhfort PUBLIC -check all -fpe0 -warn -traceback -debug extended)
+  target_compile_options(zakhfort PUBLIC -warn -fpe0 -traceback -debug extended)# -check all -coarray )
 elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")  # FLANG
   target_compile_options(zakhfort PUBLIC -Mallocatable=03)
 endif()

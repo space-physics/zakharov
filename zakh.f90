@@ -11,7 +11,7 @@ use perf, only: sysclock2ms
 
 implicit none
 
-integer(i64) :: tic, toc
+!integer(i64) :: tic, toc
 
 real(wp), parameter :: pi = 4.0_wp * atan(1.0_wp)
 

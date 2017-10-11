@@ -11,6 +11,7 @@ init:
   - set ORIGPATH=%PATH%
 
 build_script:
+  - dir C:\MinGW\bin
   - cd bin
   
   - set PATH=C:\Program Files (x86)\CMake\bin

@@ -1,13 +1,17 @@
+environment:
+  matrix:
+    - PYTHON_VERSION: 3.6
 
-platform: mingw
+platform:
+  - x64
 
 clone_depth: 3
 
-init:  
-  - set ORIGPATH=%PATH%
+#init:  
+#  - set ORIGPATH=%PATH%
 
 build_script:
-  - set PATH=C:\Program Files (x86)\CMake\bin
+#  - set PATH=C:\Program Files (x86)\CMake\bin
   - cd bin
   - cmake .. -G "MinGW Makefiles" 
   - make

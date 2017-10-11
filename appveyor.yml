@@ -1,6 +1,6 @@
 environment:
   PYTHON_VERSION: 3.6
-  FC: C:\MinGW\bin\gfortran.exe
+  FC: C:\msys64\mingw64\bin\gfortran.exe
 
 platform:
   - x64
@@ -11,8 +11,6 @@ init:
   - set ORIGPATH=%PATH%
 
 build_script:
-  - dir C:\msys64\mingw64\bin
-  - dir C:\MinGW\bin
   - cd bin
   
   - set PATH=C:\Program Files (x86)\CMake\bin

@@ -1,7 +1,6 @@
 environment:
-  matrix:
-    - PYTHON_VERSION: 3.6
-    FC: C:\MinGW\bin\gfortran.exe
+  PYTHON_VERSION: 3.6
+  FC: C:\MinGW\bin\gfortran.exe
 
 platform:
   - x64

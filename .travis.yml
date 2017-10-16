@@ -3,6 +3,8 @@ language: cpp
 os:
   - linux
   - osx
+  
+env: FC=gfortran-7
 
 dist: trusty  
 group: edge
@@ -23,8 +25,6 @@ before_install:
       brew update;
       brew install gcc;
     fi
-
-  - export FC=gfortran-7
 
 install: 
     - cd bin

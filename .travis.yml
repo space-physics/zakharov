@@ -6,7 +6,7 @@ os:
   
 env: FC=gfortran-7
 
-dist: trusty  
+dist: trusty
 group: edge
 
 notifications:

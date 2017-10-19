@@ -30,7 +30,7 @@ else()
   set(FCOOPT -fcoarray=single)
 endif()
 
-  add_compile_options(-Wall -Wextra -Wpedantic -fexceptions -Warray-bounds -fstack-protector)
+  add_compile_options(-Wall -Wextra -Wpedantic -fexceptions -Werror=array-bounds -fstack-protector)
 
   target_compile_options(zakhfort PUBLIC 
   ${FCOOPT}

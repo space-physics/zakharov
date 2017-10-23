@@ -1,10 +1,12 @@
 language: cpp
+fast_finish: true
 
 os:
   - linux
   - osx
   
-env: FC=gfortran-7
+env: 
+  - FC=gfortran-7
 
 dist: trusty
 group: edge
@@ -24,6 +26,7 @@ before_install:
   - if [[ $TRAVIS_OS_NAME == osx ]]; then
       brew update;
       brew install gcc;
+      export FC=gfortran;
     fi
 
 install: 

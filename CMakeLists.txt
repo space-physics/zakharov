@@ -10,7 +10,7 @@ add_compile_options(-O3 -mtune=native -g)
 
 #------------
 find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIR})
 
 
 add_executable(zakh zakh.cpp)

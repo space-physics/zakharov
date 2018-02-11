@@ -8,11 +8,8 @@ os:
 env: 
   - FC=gfortran-7
 
-dist: trusty
-group: edge
+group: travis_latest
 
-notifications:
-  email: false
 
 git:
   depth: 3
@@ -25,7 +22,8 @@ addons:
 before_install:
   - if [[ $TRAVIS_OS_NAME == osx ]]; then
       brew update;
-      brew install gcc;
+      brew install gcc || true;
+      brew link --overwrite gcc;
       export FC=gfortran;
     fi
 

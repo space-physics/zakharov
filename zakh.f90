@@ -307,12 +307,12 @@ do beamj=1,Nvbeam
     do tt1=1,TT
 
   !		int c0=(tt1-1) % 3
-      c1= mod(tt1, 3)+1
-      c2= mod(tt1+1, 3)+1
+      c1= modulo(tt1, 3)+1
+      c2= modulo(tt1+1, 3)+1
   !		long double omega_off=omegae+2*pi*300000
 
   		! update display every 50th iteration
-      if (mod(tt1,50) == 0) print '(A,I0.3,F7.2,A,I0.3,A,I0.3)',"Realization: ",&
+      if (modulo(tt1,50) == 0) print '(A,I0.3,F7.2,A,I0.3,A,I0.3)',"Realization: ",&
           realization,tt1*100.0/TT,"% complete.  n",beami," v",beamj
 
       call calc_k1(N,nn,k1,SSE)
@@ -455,7 +455,7 @@ do beamj=1,Nvbeam
       end do ! pp N/2
 
   ! WRITE TO FILE
-      if ( mod(tt1,res) == 0) then
+      if ( modulo(tt1,res) == 0) then
       !  print *, 'updating output EE nn files'
         write(uEE) EE(c2,:,:)
         write(unn) nn(c2,:,:)

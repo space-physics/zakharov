@@ -2,6 +2,10 @@
    :target: https://doi.org/10.5281/zenodo.168586
 .. image:: https://travis-ci.org/scivision/zakharov.svg?branch=master
     :target: https://travis-ci.org/scivision/zakharov
+.. image:: https://ci.appveyor.com/api/projects/status/n7cf0k2rwh5rggle?svg=true
+    :target: https://ci.appveyor.com/project/scivision/zakharov
+
+
 
 ================================
 Langmuir-1D Simulation

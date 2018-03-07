@@ -3,39 +3,34 @@ project(zahkarov CXX Fortran)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 add_compile_options(-O3 -mtune=native -g)
 
 #------------
-find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
-include_directories(${Boost_INCLUDE_DIR})
+if(NOT WIN32)
+  find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
+  include_directories(${Boost_INCLUDE_DIR})
 
-
-add_executable(zakh zakh.cpp)
-target_link_libraries(zakh ${Boost_LIBRARIES})
-
+  add_executable(zakh zakh.cpp)
+  target_link_libraries(zakh ${Boost_LIBRARIES})
+endif()
 #------------
-
-
 add_executable(zakhfort zakh.f90 perf.f90)
 if(${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
 
-find_package(CAF)
-if(CAF_FOUND)
-  set(FCOOPT -fcoarray=lib)
-  set(FCOLIB caf_mpi)
-else()
-  set(FCOOPT -fcoarray=single)
-endif()
+  find_package(CAF)
+  if(CAF_FOUND)
+    set(FCOOPT -fcoarray=lib)
+    set(FCOLIB caf_mpi)
+  else()
+    set(FCOOPT -fcoarray=single)
+  endif()
 
-  add_compile_options(-Wall -Wextra -Wpedantic -fexceptions -Werror=array-bounds -fstack-protector)
+  add_compile_options(-Wall -Wextra -Wpedantic -fexceptions -Werror=array-bounds)
 
   target_compile_options(zakhfort PUBLIC 
   ${FCOOPT}
-  -std=f2008 -fall-intrinsics
-  -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace -ffree-line-length-0 -fcheck=all -ffpe-trap=invalid,zero,overflow -finit-real=nan)
+  -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace 
+  -ffree-line-length-0 -fcheck=all -ffpe-trap=invalid,zero,overflow)
 
   target_link_libraries(zakhfort ${FCOLIB})
 

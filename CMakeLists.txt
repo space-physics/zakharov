@@ -5,6 +5,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 add_compile_options(-O3 -mtune=native -g)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 #------------
 if(NOT WIN32)
   find_package(Boost REQUIRED COMPONENTS system filesystem program_options)

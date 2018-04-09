@@ -13,32 +13,31 @@ implicit none
 
 !integer(i64) :: tic, toc
 
-real(wp), parameter :: pi = 4.0_wp * atan(1.0_wp)
+real(wp), parameter :: pi = 4.0_wp * atan(1.0_wp),&
+                       me=9.10938356e-31_wp, & ! kg
+                       electroncharge=1.60217662e-19_wp, & ! coulombs
+                       mi=16*1.66e-27_wp, & ! atomic oxygen
+                       Kb=1.38064852e-23_wp, &    ! Boltzmann cte
+                       eV=1.602176565e-19_wp, epsilon0=8.854187817e-12_wp
 
-real(wp), parameter :: me=9.10938356e-31_wp ! kg
-real(wp), parameter :: electroncharge=1.60217662e-19_wp ! coulombs
-real(wp), parameter :: mi=16*1.66e-27_wp ! atomic oxygen
-real(wp), parameter :: Kb=1.38064852e-23_wp    ! Boltzmann cte
-real(wp), parameter :: eV=1.602176565e-19_wp, epsilon0=8.854187817e-12_wp
-
-real(wp), parameter :: Te=3000.0_wp, Ti=1000.0_wp, Z=1.0_wp
-real(wp), parameter :: nuic=1.0_wp ! ion collision freq
-real(wp), parameter :: nuec=100.0_wp ! electron collision freq
-real(wp), parameter :: n0=5.0e11_wp ! background density
+real(wp), parameter :: Te=3000.0_wp, Ti=1000.0_wp, Z=1.0_wp, &
+                       nuic=1.0_wp, & ! ion collision freq
+                       nuec=100.0_wp, & ! electron collision freq
+                       n0=5.0e11_wp ! background density
 
 real(wp), parameter :: vbeam_ev(1) = [500.0_wp]
 integer, parameter :: Nvbeam=size(vbeam_ev)
 real(wp) :: vbeam(Nvbeam), tetabeam(Nvbeam)
 
 
-real(wp), parameter :: power_n_cte=7.7735e6_wp/sqrt(53.5_wp)
-real(wp), parameter :: power_E_cte=0.5033_wp*0.5033_wp/sqrt(3.0_wp)
+real(wp), parameter :: power_n_cte=7.7735e6_wp / sqrt(53.5_wp),&
+                       power_E_cte=0.5033_wp*0.5033_wp / sqrt(3.0_wp)
 
 !    Kappa parameters
 ! look at Broughton et al., Modeling of MF wave mode conversion
-real(wp), parameter :: se_percent=0.001_wp, kappa=1.584_wp, T_se=18.2_wp*eV
-real(wp), parameter :: theta_se=sqrt((kappa-1.5_wp)/kappa*2.0_wp*T_se/me)
-real(wp), parameter :: se_cte= 0.7397_wp / theta_se**3.0_wp
+real(wp), parameter :: se_percent=0.001_wp, kappa=1.584_wp, T_se=18.2_wp*eV, &
+                       theta_se=sqrt((kappa-1.5_wp)/kappa*2.0_wp*T_se/me), &
+                       se_cte= 0.7397_wp / theta_se**3.0_wp
 
 !    Simulation parameters
 
@@ -58,11 +57,11 @@ integer :: Nseed, clock
 real(wp) :: rdist(N)
 
 
-real(wp), parameter :: eta=(Te+3.0_wp*Ti) / Te
-real(wp), parameter :: ve=sqrt(Kb*Te/me)
-real(wp), parameter :: Cs=sqrt(eta*me/mi)*ve
-real(wp), parameter :: omegae=sqrt(n0*electroncharge**2.0_wp/me/epsilon0)
-real(wp), parameter :: lambdaD=ve/omegae
+real(wp), parameter :: eta=(Te+3.0_wp*Ti) / Te, &
+                       ve=sqrt(Kb*Te/me), &
+                       Cs=sqrt(eta*me/mi)*ve, &
+                       omegae=sqrt(n0*electroncharge**2.0_wp/me/epsilon0), &
+                       lambdaD=ve/omegae
 
 real(wp), allocatable :: beamev(:), nbeam(:)
 integer :: Nnbeam
@@ -83,7 +82,7 @@ type params
   real(wp) :: pi, me,electroncharge,mi, Kb,eV,epsilon0, Z,Te, Ti, nuic, nuec, n0, nbeam, &
             vbeam_ev, vbeam, tetabeam, endTime, Tstep, TT, res, TT_res, L, N, Xstep, QW, &
             eta, ve, Cs, omegae, lambdaD
-!  	//have to include other parameters regarding the Kappa distribution
+!  	have to include other parameters regarding the Kappa distribution
 
 end type params
 
@@ -95,16 +94,14 @@ real(wp):: EE(3,N,2), nn(3,N,2), vv(3,N,2), CC(2), SSE(N,2), SSn(2), cte1, cte2,
 
 integer :: LL,UU,pp
 
-!----
-
-! argparse
+!---- argparse
 argc = command_argument_count()
+if (argc < 3) error stop 'must input:   outputDirectory endTime beamEnergy(s)'
 
 call get_command_argument(1,argv)
 odir = trim(argv)
 print *,'writing output to', odir
-! call execute_command_line('mkdir -p '//odir)  ! FIXME temp disable for flang F2003 compat
-call system('mkdir -p '//odir)
+call execute_command_line('mkdir -p '//odir) 
 
 call get_command_argument(2,argv)
 read(argv,*) endTime
@@ -121,9 +118,7 @@ Nnbeam = size(beamev)
 
 nbeam = beamev*n0
 
-print *, "Nnbeam=", Nnbeam
-print *, "Nvbeam=",Nvbeam
-print *,"TT=",TT,"time steps"
+print *, "Nnbeam=", Nnbeam, "Nvbeam=",Nvbeam, "TT=",TT,"time steps"
 
 call cpu_time(tic1)
 
@@ -132,15 +127,14 @@ call cpu_time(tic1)
 vbeam=sqrt(eV*vbeam_ev*2/me)
  tetabeam=0.3*vbeam
 
-print *,"vbeam=",vbeam
-print *,"tetabeam=",tetabeam
+print *,"vbeam=",vbeam,"tetabeam=",tetabeam
 
 call random_seed(size=nseed)
 allocate(seed(nseed))
 seed(:) = 600  ! FIXME: arbitrary for simulation repeatability
 
-do beami=1,Nnbeam
-do beamj=1,Nvbeam
+nbm: do beami=1,Nnbeam
+vbm: do beamj=1,Nvbeam
 
   parameters%pi = pi
   parameters%me = me
@@ -198,7 +192,6 @@ do beamj=1,Nvbeam
       Xsection_pl=Xsection_pl/N**2
       n_thermal_k_squared=Xsection_ion*n0
       E_thermal_k_squared=Xsection_pl *n0* (electroncharge/epsilon0/k(ii))**2.0_wp
-
     end if
 
     omegaL(ii)=sqrt(omegae**2.0_wp + 3.0_wp*(k(ii)*ve)**2.0_wp)
@@ -267,7 +260,7 @@ do beamj=1,Nvbeam
   print *, "Wrote to ", trim(argv)
 
 
-  do realization=1,QW
+  rlz: do realization=1,QW
     cte2=omegae/2.0_wp/n0
 
     call system_clock(clock)
@@ -466,9 +459,9 @@ do beamj=1,Nvbeam
     close(uEE)
     close(unn)
 
-  end do !realizations
-end do !Nvbeam
-end do !Nnbeam
+  end do rlz !realizations
+end do vbm !Nvbeam
+end do nbm !Nnbeam
 
 
 call cpu_time(toc1)
@@ -478,7 +471,7 @@ print *,"Elapsed Time: ", toc1-tic1
 contains
 
 
-subroutine calc_k1(N,nn,k1,SSE)
+subroutine calc_k1(N,nn, k1,SSE)
 
 integer :: pp
 integer, intent(in) :: N
@@ -495,8 +488,8 @@ do pp=1,N
   CC(:)=0.0_wp
 
   do q=LL,UU
-    CC(1)=CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
-    CC(2)=CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1)
+    CC(1) = CC(1)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,1)-EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,2)
+    CC(2) = CC(2)+EE(c1,q+N/2,1)*nn(c1,p(pp)-q+N/2,2)+EE(c1,q+N/2,2)*nn(c1,p(pp)-q+N/2,1)
   end do
 
   call random_number(rdist(:2))

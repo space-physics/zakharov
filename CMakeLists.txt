@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.0)
 project(zahkarov CXX Fortran)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -11,14 +11,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #------------
 if(NOT WIN32)
   find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
-  include_directories(${Boost_INCLUDE_DIR})
+  include_directories(${Boost_INCLUDE_DIRS})
 
   add_executable(zakh zakh.cpp)
   target_link_libraries(zakh ${Boost_LIBRARIES})
 endif()
 #------------
 add_executable(zakhfort zakh.f90 perf.f90)
-if(${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
+if(${CMAKE_Fortran_COMPILER_ID} STREQUAL GNU)
 
   find_package(CAF)
   if(CAF_FOUND)
@@ -38,8 +38,8 @@ if(${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU")
   target_link_libraries(zakhfort ${FCOLIB})
 
 
-elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel")
+elseif(${CMAKE_Fortran_COMPILER_ID} STREQUAL Intel)
   target_compile_options(zakhfort PUBLIC -warn -fpe0 -traceback -debug extended)# -check all -coarray )
-elseif(${CMAKE_Fortran_COMPILER_ID} MATCHES "PGI")  # FLANG
+elseif(${CMAKE_Fortran_COMPILER_ID} STREQUAL PGI)  # FLANG
   target_compile_options(zakhfort PUBLIC -Mallocatable=03)
 endif()

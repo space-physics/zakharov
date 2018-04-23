@@ -15,7 +15,7 @@ Zakharov Simulation
 
 Originally authored by Hassanali Akbari as part of his PhD work.
 
-Michael Hirsch converted to Fortran 2008, and should work with `gfortran`, `ifort`, `flang` and other Fortran compilers on any operating system and computer.
+Michael Hirsch converted to Fortran 2008, and works with `gfortran`, `ifort`, `flang` and other Fortran compilers on any operating system and computer.
 
 
 :author: Hassanali Akbari, Michael Hirsch, Ph.D.

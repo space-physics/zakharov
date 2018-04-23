@@ -12,22 +12,21 @@ add_executable(zakhfort)
 
 if(${CMAKE_Fortran_COMPILER_ID} STREQUAL GNU)
 
-  find_package(CAF)
-  if(CAF_FOUND)
-    set(FCOOPT -fcoarray=lib)
-    set(FCOLIB caf_mpi)
+  find_package(OpenCoarrays)
+  if(OpenCoarrays_FOUND)
+    list(APPEND OpenCoarrays_LIBRARIES caf_mpi)
+    add_compile_options(-fcoarray=lib)
   else()
-    set(FCOOPT -fcoarray=single)
+    add_compile_options(-fcoarray=single)
   endif()
 
   add_compile_options(-Wall -Wextra -Wpedantic -fexceptions -Werror=array-bounds)
 
   target_compile_options(zakhfort PUBLIC 
-  ${FCOOPT}
   -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace 
   -ffree-line-length-0 -fcheck=all -ffpe-trap=invalid,zero,overflow)
 
-  target_link_libraries(zakhfort ${FCOLIB})
+  target_link_libraries(zakhfort ${OpenCoarrays_LIBRARIES})
 
 elseif(${CMAKE_Fortran_COMPILER_ID} STREQUAL Intel)
   target_compile_options(zakhfort PUBLIC -warn -fpe0 -traceback -debug extended)# -check all -coarray )

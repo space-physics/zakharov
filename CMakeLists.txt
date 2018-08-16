@@ -1,9 +1,9 @@
-cmake_minimum_required (VERSION 3.11)
+cmake_minimum_required (VERSION 3.7)
 project(zahkarov CXX Fortran)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-add_compile_options(-O3 -mtune=native -g)
+add_compile_options(-O3 -g)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,7 +20,7 @@ if(${CMAKE_Fortran_COMPILER_ID} STREQUAL GNU)
     add_compile_options(-fcoarray=single)
   endif()
 
-  add_compile_options(-Wall -Wextra -Wpedantic -fexceptions -Werror=array-bounds)
+  add_compile_options(-mtune=native -Wall -Wextra -Wpedantic -fexceptions -Werror=array-bounds)
 
   target_compile_options(zakhfort PUBLIC 
   -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace 

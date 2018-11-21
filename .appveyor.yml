@@ -12,9 +12,6 @@ build: off
 init:
 - cmd: set PATH=%MINGW_DIR%;%PATH%
 
-- sh: sudo apt -yq update > /dev/null
-- sh: sudo apt install -yq --no-install-suggests --no-install-recommends libboost-filesystem-dev libboost-program-options-dev > /dev/null
-
 install:
 - cd bin
 

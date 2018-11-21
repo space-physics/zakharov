@@ -1,28 +1,28 @@
 language: cpp
 group: travis_latest
+dist: xenial
 
 git:
   depth: 3
   quiet: true
 
-os:
-- linux
-- osx
-
-env: 
-  - FC=gfortran-7
+env: FC=gfortran
 
 addons:
   apt:
-    sources: ubuntu-toolchain-r-test
-    packages: ['gfortran-7','libboost-filesystem-dev','libboost-program-options-dev']
+    packages:
+    - gfortran
 
-before_install:
-- if [[ $TRAVIS_OS_NAME == osx ]]; then
-    brew update;
-    brew install gcc > /dev/null || brew link --overwrite gcc > /dev/null;
-    export FC=gfortran;
-  fi
+matrix:
+  include:
+  - os: linux
+  - os: osx
+    before_install: brew install gcc > /dev/null
+  - os: windows
+    language: sh
+    install:
+    - cd bin
+    - cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
 
 install: 
 - cd bin

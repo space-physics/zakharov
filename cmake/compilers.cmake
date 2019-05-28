@@ -1,8 +1,4 @@
-
-set(CMAKE_CXX_STANDARD 17)
-
 if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
-
   add_compile_options(-mtune=native -Wall -Wextra -Wpedantic -fexceptions -Werror=array-bounds)
 
   list(APPEND FFLAGS -Warray-temporaries -Wconversion -fimplicit-none)

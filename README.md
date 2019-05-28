@@ -19,34 +19,39 @@ The procedure to use this program is as follows:
 ## Build
 
 * Linux
-  ```sh
-  apt install g++ cmake libboost-filesystem-dev libboost-program-options-dev
-  ```sh
+
+    ```sh
+    apt install g++ cmake libboost-filesystem-dev libboost-program-options-dev
+    ```
 * Mac
-  ```sh
-  brew install gcc boost
-  ```
-  
+
+    ```sh
+    brew install gcc boost
+    ```
+
 and then
+
 ```sh
-cd bin
-cmake ..
-cmake --build .
+cmake -B build -S .
+
+cmake --build build
+```
 
 ## Run Simulation
 
 arguments are: output_directory simulation_end_time electron_beam_env(as many beams as you like):
+
 ```sh
 ./zakhfort /tmp/test 1e-4 300
 ```
 
-### C++ 
+### C++
 
 ```sh
 ./zakh --ev 300 -o /tmp/testcxx
 ```
 
-* `--ev` beam energy 
+* `--ev` beam energy
 * `-o` output directory (will be created if it doesn't exist)
 
 ### Plot Results

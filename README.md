@@ -1,5 +1,5 @@
 [![image](https://zenodo.org/badge/DOI/10.5281/zenodo.168586.svg)](https://doi.org/10.5281/zenodo.168586)
-[![image](https://travis-ci.org/scivision/zakharov.svg?branch=master)](https://travis-ci.org/scivision/zakharov)
+
 [![image](https://ci.appveyor.com/api/projects/status/n7cf0k2rwh5rggle?svg=true)](https://ci.appveyor.com/project/scivision/zakharov)
 
 # Langmuir-1D Simulation
@@ -32,9 +32,9 @@ The procedure to use this program is as follows:
 and then
 
 ```sh
-cmake -B build -S .
+cmake -B build
 
-cmake --build build
+cmake --build build --parallel
 ```
 
 ## Run Simulation

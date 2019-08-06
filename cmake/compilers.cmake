@@ -14,9 +14,9 @@ if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
 elseif(CMAKE_Fortran_COMPILER_ID STREQUAL Intel)
 
   if(WIN32)
-    list(APPEND FFLAGS /4Yd /warn /traceback /coarray)
+    list(APPEND FFLAGS /warn:declarations /warn /traceback /coarray)
   else()
-    list(APPEND FFLAGS -implicitnone -warn -traceback -coarray)
+    list(APPEND FFLAGS -warn declarations -warn -traceback -coarray)
   endif()
 
   if(CMAKE_BUILD_TYPE STREQUAL Debug)

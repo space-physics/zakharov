@@ -24,8 +24,8 @@ matrix:
     - cd bin
     - cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
 
-install: 
+install:
 - cd bin
 - cmake ..
-    
+
 script: cmake --build .

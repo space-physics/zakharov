@@ -19,13 +19,3 @@ jobs:
     - run: ctest -S setup.cmake -VV
       env:
         FC: gfortran-9
-
-
-  windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
-
-    - run: cinst -y ninja
-
-    - run: ctest -S setup.cmake -VV

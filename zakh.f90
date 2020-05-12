@@ -101,7 +101,7 @@ if (argc < 3) error stop 'must input:   outputDirectory endTime beamEnergy(s)'
 call get_command_argument(1,argv)
 odir = trim(argv)
 print *,'writing output to', odir
-call execute_command_line('mkdir -p '//odir) 
+call execute_command_line('mkdir -p '//odir)
 
 call get_command_argument(2,argv)
 read(argv,*) endTime
@@ -171,7 +171,7 @@ vbm: do beamj=1,Nvbeam
   write(argv,'(A,I0.3,A,I0.3,A)')  odir//"/parameters_n" , beami, "_v" , beamj,'.bin'
   ofn = trim(argv)
 
-  open(newunit=u, file=ofn, status='new',action='write', access='stream')
+  open(newunit=u, file=ofn, status='replace',action='write', access='stream')
   write(u) parameters, real(SEED,wp)
   close(u)
   print *, "Wrote parameters to ",ofn
@@ -253,7 +253,7 @@ vbm: do beamj=1,Nvbeam
 
 
   write(argv,'(A,I0.3,A,I0.3,A)') odir//"/output1_n",beami,"_v", beamj,'.bin'
-  open(newunit=u,file=trim(argv),status='new',action='write',access='stream')
+  open(newunit=u,file=trim(argv),status='replace',action='write',access='stream')
 
   write(u) output1
   close(u)
@@ -268,11 +268,11 @@ vbm: do beamj=1,Nvbeam
     call random_seed(put=seed)
 
     write(argv,'(A,I0.3,I0.3,A,I0.3,A,I0.3,A)') odir//"/EE",seed(1),realization,"_n",beami,"_v",beamj,".bin"
-    open(newunit=uEE,file=trim(argv), status='new',action='write',access='stream')
+    open(newunit=uEE,file=trim(argv), status='replace',action='write',access='stream')
     print *,'writing to ',trim(argv)
 
     write(argv,'(A,I0.3,I0.3,A,I0.3,A,I0.3,A)') odir//"/nn",seed(1),realization, "_n" ,beami, "_v",beamj,'.bin'
-    open(newunit=uNN,file=trim(argv), status='new',action='write',access='stream')
+    open(newunit=uNN,file=trim(argv), status='replace',action='write',access='stream')
     print *,'writing to ',trim(argv)
 
   !   main loops

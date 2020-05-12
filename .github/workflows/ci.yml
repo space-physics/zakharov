@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+    paths:
+      - "**.f90"
+      - "**.cmake"
+      - "**.txt"
+      - ".github/workflows/ci.yml"
+  pull_request:
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: ctest -S setup.cmake -VV
+      env:
+        FC: gfortran-9
+
+
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: cinst -y ninja
+
+    - run: ctest -S setup.cmake -VV

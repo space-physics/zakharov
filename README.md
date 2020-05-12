@@ -1,8 +1,7 @@
-[![image](https://zenodo.org/badge/DOI/10.5281/zenodo.168586.svg)](https://doi.org/10.5281/zenodo.168586)
-
-[![image](https://ci.appveyor.com/api/projects/status/n7cf0k2rwh5rggle?svg=true)](https://ci.appveyor.com/project/scivision/zakharov)
-
 # Langmuir-1D Simulation
+
+[![image](https://zenodo.org/badge/DOI/10.5281/zenodo.168586.svg)](https://doi.org/10.5281/zenodo.168586)
+![ci_cmake](https://github.com/space-physics/zakharov/workflows/ci/badge.svg)
 
 Zakharov Simulation
 

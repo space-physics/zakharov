@@ -5,9 +5,8 @@ on:
     paths:
       - "**.f90"
       - "**.cmake"
-      - "**.txt"
+      - "**/CMakeLists.txt"
       - ".github/workflows/ci.yml"
-  pull_request:
 
 jobs:
 

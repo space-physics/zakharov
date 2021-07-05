@@ -2,6 +2,7 @@ if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
   add_compile_options(-mtune=native -Wall -Wextra -fexceptions -Werror=array-bounds)
 
   string(APPEND CMAKE_Fortran_FLAGS " -fimplicit-none")
+  string(APPEND CMAKE_Fortran_FLAGS_RELEASE " -Wno-maybe-uninitialized")
   string(APPEND CMAKE_Fortran_FLAGS_DEBUG " -fcheck=all -ffpe-trap=invalid,zero,overflow")
 
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES Intel)

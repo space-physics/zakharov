@@ -48,13 +48,12 @@ integer, parameter :: res=20
 !TT_res=floor(endTime/Tstep/res)
 
 real(wp), parameter :: L=70.0_wp           ! simulation box length (meter)j
-integer, parameter :: N=2046          ! number of samples in L should be devidable by 6
-real(wp), parameter :: Xstep= L / N
+integer :: N
+real(wp) :: Xstep
 integer, parameter :: QW=1     ! number of realizations
 
 integer, allocatable :: SEED(:)
 integer :: Nseed, clock
-real(wp) :: rdist(N)
 
 
 real(wp), parameter :: eta=(Te+3.0_wp*Ti) / Te, &
@@ -73,9 +72,8 @@ real(wp) :: tic1,toc1
 
 !---- main loop variables
 
-integer :: p(N)
-real(wp) :: k(N), Xsection_ion, Xsection_pl, E_thermal_k_squared, n_thermal_k_squared, Source_factor_E(N), &
-  Source_factor_n(N), omegaL(N), gamas, nui(N), gamal1, gamal2, gamal3, gamal, nue(N), output1(N,12)
+real(wp) :: Xsection_ion, Xsection_pl, E_thermal_k_squared, n_thermal_k_squared, &
+  gamas,  gamal1, gamal2, gamal3, gamal
 
 type params
 
@@ -88,11 +86,24 @@ end type params
 
 type(params) :: parameters
 
+integer, allocatable :: p(:)
 
-real(wp):: EE(3,N,2), nn(3,N,2), vv(3,N,2), CC(2), SSE(N,2), SSn(2), cte1, cte2, &
-    k1(N,2), k2(N,2), k3(N,2), k4(N,2), kn1(2), kn2(2), kn3(2), kn4(2), kv1(2), kv2(2), kv3(2), kv4(2)
+real(wp) :: CC(2), SSn(2), cte1, cte2, kn1(2), kn2(2), kn3(2), kn4(2), kv1(2), kv2(2), kv3(2), kv4(2)
+
+real(wp), allocatable :: Source_factor_E(:), rdist(:), k(:),  Source_factor_n(:), omegaL(:), nui(:), nue(:), output1(:,:), &
+EE(:,:,:), nn(:,:,:), vv(:,:,:), SSE(:,:), k1(:,:), k2(:,:), k3(:,:), k4(:,:)
 
 integer :: LL,UU,pp
+
+N = 2046
+!! number of samples in L should be divisible by 6
+
+Xstep = L / N
+
+allocate(p(N))
+allocate(rdist(N), k(N), Source_factor_n(N), Source_factor_E(N), omegaL(N), nui(N), nue(N), output1(N,12), &
+   EE(3,N,2), nn(3,N,2), vv(3,N,2), SSE(N,2), k1(N,2), k2(N,2), k3(N,2), k4(N,2))
+
 
 !---- argparse
 argc = command_argument_count()

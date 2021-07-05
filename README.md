@@ -7,13 +7,7 @@ Zakharov Simulation
 
 Originally authored by Hassanali Akbari as part of his PhD work.
 
-Michael Hirsch converted to Fortran 2008, and works with `gfortran`, `ifort`, `flang` and other Fortran compilers on any operating system and computer.
-
-The procedure to use this program is as follows:
-
-1.  Build the Fortran code
-2.  run the simulation
-3.  plot with Matlab
+Michael Hirsch converted to Fortran.
 
 ## Build
 
@@ -33,7 +27,10 @@ and then
 ```sh
 cmake -B build
 
-cmake --build build --parallel
+cmake --build build
+
+ctest --test-dir build
+# optional
 ```
 
 ## Run Simulation
@@ -55,7 +52,8 @@ arguments are: output_directory simulation_end_time electron_beam_env(as many be
 
 ### Plot Results
 
-From GNU Octave or Matlab:
+From GNU Octave or Matlab (in matlab/ directory):
+
 ```sh
 Sim_v6_3_Linux(0, /tmp/test)
 ```

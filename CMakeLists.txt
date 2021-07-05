@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.14...3.21)
 
 project(zahkarov
   LANGUAGES CXX Fortran)
@@ -13,5 +13,6 @@ add_test(NAME ZakharovFortran COMMAND $<TARGET_FILE:zakhfort> ${CMAKE_CURRENT_BI
 find_package(Boost COMPONENTS filesystem program_options)
 if(Boost_FOUND)
   add_executable(zakh zakh.cpp)
-  target_link_libraries(zakh PRIVATE Boost::filesystem Boost::program_options)
+  target_link_libraries(zakh PRIVATE Boost::program_options)
+  target_compile_features(zakh PRIVATE cxx_std_17)
 endif()

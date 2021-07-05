@@ -4,7 +4,6 @@
 
 //Michael Hirsch Oct 2013 -- updated vbeam,tetabeam to use C++ vector format
 
-#include <boost/filesystem.hpp>
 #include "boost/program_options.hpp"
 #include <iostream>
 #include <fstream>
@@ -17,6 +16,7 @@
 #include <chrono>
 #include <fstream>
 #include <cmath>
+#include <filesystem>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -132,19 +132,17 @@ int main(int argc, char ** argv)
 
 //-------------------------------------------------------------------------------------
 // create output directory if it doesn't exist
-    std::string outDir = odir + boost::filesystem::path::preferred_separator;
+    std::filesystem::path outDir = odir;
 
-    boost::filesystem::path odir(outDir);
-
-    if(!(boost::filesystem::exists(odir))){
-        if (boost::filesystem::create_directory(odir))
+    if(!(std::filesystem::exists(outDir))){
+        if (std::filesystem::create_directory(outDir))
             std::cout << "created output directory " << outDir << std::endl;
     }
     else{
         std::cout << "using existing output directory " << outDir << std::endl;
     }
 //-------------------------------------------------------------------------------------
-    printf("Nnbeam=%i \n",Nnbeam);
+  printf("Nnbeam=%i \n",Nnbeam);
 	printf("Nvbeam=%i \n",Nvbeam);
 	printf("TT=%0.1f time steps \n",TT);
 
@@ -222,7 +220,7 @@ std::vector<std::vector<double> > output1(N, std::vector<double> (12));
 	//have to include other parameters regarding the Kappa distribution
 
   char fnp[256];
-	std::sprintf(fnp, "%sparameters_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
+	std::sprintf(fnp, "%sparameters_n%03d_v%03d.bin",outDir.string().c_str(),beami+1,beamj+1);
   {
 	std::ofstream FILE(fnp, std::ios::out | std::ios::binary);
   FILE.write(reinterpret_cast<char*>(&parameters[0]), parameters.size()*sizeof(double));
@@ -294,7 +292,7 @@ std::vector<std::vector<double> > output1(N, std::vector<double> (12));
 
 
   char fno[256];
-	std::sprintf(fno,"%soutput1_n%03d_v%03d.bin",outDir.c_str(),beami+1,beamj+1);
+	std::sprintf(fno,"%soutput1_n%03d_v%03d.bin",outDir.string().c_str(),beami+1,beamj+1);
   {
   std::ofstream FILE(fno, std::ios::out | std::ios::binary);
 
@@ -337,12 +335,12 @@ for (int realization=0;realization<QW;realization++){
 	std::normal_distribution<long double> distribution (0.0,1.0);
 
   char nameE[256];
-	std::sprintf(nameE,"%sEE%03d%03d_n%03d_v%03d.bin",outDir.c_str(),SEED,realization+1,beami+1,beamj+1);
+	std::sprintf(nameE,"%sEE%03d%03d_n%03d_v%03d.bin",outDir.string().c_str(),SEED,realization+1,beami+1,beamj+1);
 	std::ofstream EE_out;
 	EE_out.open(nameE, std::ios::out | std::ios::binary);
 
   char namen[256];
-	std::sprintf(namen,"%snn%03d%03d_n%03d_v%03d.bin",outDir.c_str(),SEED,realization+1,beami+1,beamj+1);
+	std::sprintf(namen,"%snn%03d%03d_n%03d_v%03d.bin",outDir.string().c_str(),SEED,realization+1,beami+1,beamj+1);
 	std::ofstream nn_out;
 	nn_out.open(namen, std::ios::out | std::ios::binary);
 
